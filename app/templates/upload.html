@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Report Illegal Dumping</title>
+</head>
+<body>
+  <h1>Report Illegal Dumping</h1>
+  <p><a href="/">Home</a> | <a href="/map">View Map</a></p>
+
+  {% if error %}
+    <p style="color: red;">{{ error }}</p>
+  {% endif %}
+
+  {% if success %}
+    <p>Thanks — your report was submitted.</p>
+    {% if detections %}
+      <ul>
+        {% for d in detections %}
+          <li>{{ d.class_name }} ({{ (d.confidence * 100) | round(1) }}%)</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No waste detected in this image yet — it will still be reviewed manually.</p>
+    {% endif %}
+  {% endif %}
+
+  <p id="location-status">Requesting your location…</p>
+
+  <form action="/report" method="post" enctype="multipart/form-data">
+    <p>
+      <label for="photo">Photo of the dumping site:</label><br>
+      <input type="file" id="photo" name="photo" accept="image/*" required>
+    </p>
+    <p>
+      <label for="contact">Your contact (optional, for follow-up):</label><br>
+      <input type="text" id="contact" name="contact">
+    </p>
+    <input type="hidden" id="latitude" name="latitude">
+    <input type="hidden" id="longitude" name="longitude">
+    <button type="submit">Submit Report</button>
+  </form>
+
+  <script>
+    // Browser-uploaded/captured photos often lack EXIF GPS (stripped for privacy,
+    // or never saved to a file at all), so location comes from the Geolocation
+    // API here rather than from image metadata.
+    const statusEl = document.getElementById('location-status');
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          document.getElementById('latitude').value = position.coords.latitude;
+          document.getElementById('longitude').value = position.coords.longitude;
+          statusEl.textContent = 'Location captured — thanks!';
+        },
+        () => {
+          statusEl.textContent = 'Location unavailable — you can still submit, but the report may not be mappable.';
+        }
+      );
+    } else {
+      statusEl.textContent = 'Your browser does not support location — you can still submit the report.';
+    }
+  </script>
+</body>
+</html>

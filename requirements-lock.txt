@@ -1,0 +1,69 @@
+# Exact snapshot of every installed package on the original dev machine, taken
+# via `pip freeze`, for reproducing the same environment elsewhere.
+#
+# torch / torchvision are deliberately excluded: this machine has
+# torch==2.11.0+cu128 / torchvision==0.26.0+cu128, built against CUDA 12.8.
+# That exact wheel only installs where the target GPU/driver supports it.
+# On a new machine, install torch/torchvision FIRST, matching whatever
+# `nvidia-smi` reports there (see TRANSFER steps), then install this file.
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.1
+aiohttp-retry==2.9.1
+aiosignal==1.4.0
+attrs==26.1.0
+blinker==1.9.0
+branca==0.8.2
+certifi==2026.6.17
+charset-normalizer==3.4.9
+click==8.4.2
+colorama==0.4.6
+contourpy==1.3.3
+cycler==0.12.1
+ExifRead==3.5.1
+filelock==3.29.0
+Flask==3.1.3
+Flask-Mail==0.10.0
+Flask-SQLAlchemy==3.1.1
+folium==0.20.0
+fonttools==4.63.0
+frozenlist==1.8.0
+fsspec==2026.4.0
+greenlet==3.5.3
+idna==3.18
+itsdangerous==2.2.0
+Jinja2==3.1.6
+kiwisolver==1.5.0
+MarkupSafe==3.0.3
+matplotlib==3.11.0
+mpmath==1.3.0
+multidict==6.7.1
+networkx==3.6.1
+numpy==2.4.4
+nvidia-ml-py==13.610.43
+opencv-python==5.0.0.93
+packaging==26.2
+pandas==3.0.3
+pillow==12.2.0
+polars==1.42.1
+polars-runtime-32==1.42.1
+propcache==0.5.2
+psutil==7.2.2
+PyJWT==2.13.0
+pyparsing==3.3.2
+python-dateutil==2.9.0.post0
+python-dotenv==1.2.2
+PyYAML==6.0.3
+requests==2.34.2
+six==1.17.0
+SQLAlchemy==2.0.51
+sympy==1.14.0
+twilio==9.10.9
+typing_extensions==4.15.0
+tzdata==2026.3
+ultralytics==8.4.95
+ultralytics-thop==2.0.20
+urllib3==2.7.0
+waitress==3.0.2
+Werkzeug==3.1.8
+xyzservices==2026.3.0
+yarl==1.24.2
