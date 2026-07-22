@@ -559,7 +559,7 @@ img { max-width: 100%; display: block; }
   display: grid;
   grid-template-columns: 0.85fr 1.15fr;
   gap: 40px;
-  align-items: start;
+  align-items: stretch;
   padding-bottom: 80px;
 }
 
@@ -568,6 +568,8 @@ img { max-width: 100%; display: block; }
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 32px;
+  display: flex;
+  flex-direction: column;
 }
 
 .steps-card h3 { margin: 0 0 22px; font-size: 1.2rem; font-weight: 700; }
