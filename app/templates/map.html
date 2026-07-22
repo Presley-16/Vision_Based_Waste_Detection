@@ -1,43 +1,25 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Illegal Dumping Map</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <style>
-    #map { height: 85vh; width: 100%; }
-    body { font-family: sans-serif; margin: 1rem; }
-  </style>
-</head>
-<body>
-  <h1>Illegal Dumping Hotspots</h1>
-  <p><a href="/">Home</a> | <a href="/report">Report Dumping</a></p>
-  <div id="map"></div>
+{% extends "base.html" %}
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    const map = L.map('map').setView([-17.8252, 31.0335], 12); // Harare
+{% block title %}Live Dumping Map — PlanetWatch{% endblock %}
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
+{% block content %}
+<div class="container map-shell">
+  <div class="map-header">
+    <div>
+      <span class="eyebrow"><span class="dot"></span> Live hotspot map</span>
+      <h1 style="margin: 10px 0 0; font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em;">
+        {{ report_count }} report{{ 's' if report_count != 1 else '' }} tracked
+      </h1>
+    </div>
+    <div class="map-legend">
+      <span><span class="swatch" style="background:#f6b93b;"></span> Pending</span>
+      <span><span class="swatch" style="background:#2563eb;"></span> Reviewed</span>
+      <span><span class="swatch" style="background:#12a862;"></span> Resolved</span>
+    </div>
+  </div>
 
-    fetch('/api/reports')
-      .then((response) => response.json())
-      .then((geojson) => {
-        L.geoJSON(geojson, {
-          onEachFeature: (feature, layer) => {
-            const props = feature.properties;
-            const wasteTypes = props.waste_types.length ? props.waste_types.join(', ') : 'unclassified';
-            layer.bindPopup(
-              `<strong>Report #${props.id}</strong><br>` +
-              `Waste: ${wasteTypes}<br>` +
-              `Status: ${props.status}<br>` +
-              `Submitted: ${props.submitted_at}`
-            );
-          },
-        }).addTo(map);
-      });
-  </script>
-</body>
-</html>
+  <div class="map-card">
+    <iframe title="Illegal dumping hotspot map" srcdoc="{{ map_html }}"></iframe>
+  </div>
+</div>
+{% endblock %}

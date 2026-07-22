@@ -1,65 +1,213 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Report Illegal Dumping</title>
-</head>
-<body>
-  <h1>Report Illegal Dumping</h1>
-  <p><a href="/">Home</a> | <a href="/map">View Map</a></p>
+{% extends "base.html" %}
 
-  {% if error %}
-    <p style="color: red;">{{ error }}</p>
-  {% endif %}
+{% block title %}Report Illegal Dumping — PlanetWatch{% endblock %}
 
-  {% if success %}
-    <p>Thanks — your report was submitted.</p>
-    {% if detections %}
-      <ul>
-        {% for d in detections %}
-          <li>{{ d.class_name }} ({{ (d.confidence * 100) | round(1) }}%)</li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>No waste detected in this image yet — it will still be reviewed manually.</p>
-    {% endif %}
-  {% endif %}
+{% block content %}
+{% if success %}
+  <div class="ripple-popup-overlay" id="successPopup">
+    <div class="ripple-rings">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="ripple-popup-card">
+      <img
+        class="popup-cheer-img"
+        src="{{ url_for('static', filename='img/cheer2.jpg') }}"
+        alt=""
+        onerror="this.remove();"
+      >
+      <div class="popup-check">
+        <img src="{{ url_for('static', filename='img/icons/success.png') }}" alt="">
+      </div>
+      <p>Thanks &mdash; your report was submitted</p>
+    </div>
+  </div>
+{% endif %}
+<div class="container">
+  <div class="report-banner">
+    <div class="photo-placeholder" data-fallback>
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 21c-4.4-3.4-7-6.8-7-10.5C5 6.5 8 4 12 4s7 2.5 7 6.5C19 14.2 16.4 17.6 12 21z" stroke="currentColor" stroke-width="1.4"/>
+        <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.4"/>
+      </svg>
+      <strong>Add hero-cleanup-crowd.jpg</strong>
+      <span>Drop a photo of a cleanup crew clearing a dumping site as onlookers cheer into app/static/img/</span>
+    </div>
+    <img
+      src="{{ url_for('static', filename='img/hero-cleanup-crowd.jpg') }}"
+      alt="Cleanup crew clearing an illegal dumping site as a crowd cheers"
+      onerror="this.classList.add('has-error'); this.closest('.report-banner').querySelector('[data-fallback]').classList.remove('is-hidden');"
+      onload="this.closest('.report-banner').querySelector('[data-fallback]').classList.add('is-hidden');"
+    >
+    <div class="banner-scrim"></div>
+    <div class="report-banner-content">
+      <span class="eyebrow"><span class="dot"></span> Community report</span>
+      <h1>Report Illegal Dumping</h1>
+      <p>Upload a photo of the site — our model will classify the waste automatically and route it to the cleanup map.</p>
+    </div>
+  </div>
 
-  <p id="location-status">Requesting your location…</p>
+  <div class="report-layout">
+    <div class="steps-card">
+      <h3>Before you submit</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Enable location</strong>
+          <span>Allow location access so the report can be pinned accurately on the map.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Take a clear photo</strong>
+          <span>Capture the waste from a distance that shows the full scale of the site.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Add contact (optional)</strong>
+          <span>Leave a way to reach you if the cleanup team needs more detail.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Submit</strong>
+          <span>The AI classifies the waste type and your report appears on the live map.</span>
+        </div>
+      </div>
+    </div>
 
-  <form action="/report" method="post" enctype="multipart/form-data">
-    <p>
-      <label for="photo">Photo of the dumping site:</label><br>
-      <input type="file" id="photo" name="photo" accept="image/*" required>
-    </p>
-    <p>
-      <label for="contact">Your contact (optional, for follow-up):</label><br>
-      <input type="text" id="contact" name="contact">
-    </p>
-    <input type="hidden" id="latitude" name="latitude">
-    <input type="hidden" id="longitude" name="longitude">
-    <button type="submit">Submit Report</button>
-  </form>
+    <div class="form-card">
+      <h2>Submit your report</h2>
+      <p class="form-sub">Every report helps direct cleanup crews faster.</p>
 
-  <script>
-    // Browser-uploaded/captured photos often lack EXIF GPS (stripped for privacy,
-    // or never saved to a file at all), so location comes from the Geolocation
-    // API here rather than from image metadata.
-    const statusEl = document.getElementById('location-status');
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          document.getElementById('latitude').value = position.coords.latitude;
-          document.getElementById('longitude').value = position.coords.longitude;
-          statusEl.textContent = 'Location captured — thanks!';
-        },
-        () => {
-          statusEl.textContent = 'Location unavailable — you can still submit, but the report may not be mappable.';
-        }
-      );
-    } else {
-      statusEl.textContent = 'Your browser does not support location — you can still submit the report.';
+      {% if error %}
+        <div class="alert alert-error">
+          <img src="{{ url_for('static', filename='img/icons/warning.png') }}" alt="">
+          <div>
+            <strong>Couldn't submit report</strong>
+            <p>{{ error }}</p>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if success %}
+        <div class="alert alert-success">
+          <img src="{{ url_for('static', filename='img/icons/success.png') }}" alt="">
+          <div>
+            <strong>Thanks — your report was submitted.</strong>
+            {% if detections %}
+              <p>Detected waste types:</p>
+              <ul class="detection-list">
+                {% for d in detections %}
+                  <li>{{ d.class_name }} &middot; {{ (d.confidence * 100) | round(1) }}%</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>No waste detected automatically — it will still be reviewed manually.</p>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      <span id="location-status" class="location-pill">
+        <span class="dot"></span> Requesting your location&hellip;
+      </span>
+
+      <form action="{{ url_for('report') }}" method="post" enctype="multipart/form-data">
+        <div class="field">
+          <label for="photo">Photo of the dumping site</label>
+          <div class="dropzone" id="dropzone">
+            <div class="dz-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <strong>Click to upload or drag a photo here</strong>
+            <span>JPG or PNG, up to 10MB</span>
+            <div class="dz-filename" id="dz-filename"></div>
+            <input type="file" id="photo" name="photo" accept="image/*" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="contact">Your contact (optional, for follow-up)</label>
+          <input type="text" id="contact" name="contact" placeholder="Phone or email">
+        </div>
+
+        <input type="hidden" id="latitude" name="latitude">
+        <input type="hidden" id="longitude" name="longitude">
+        <button type="submit" class="btn btn-primary btn-block">Submit Report</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const statusEl = document.getElementById('location-status');
+
+  function setLocationStatus(state, text) {
+    statusEl.className = 'location-pill' + (state ? ' ' + state : '');
+    statusEl.innerHTML = '<span class="dot"></span> ' + text;
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        document.getElementById('latitude').value = position.coords.latitude;
+        document.getElementById('longitude').value = position.coords.longitude;
+        setLocationStatus('ok', 'Location captured — thanks!');
+      },
+      () => {
+        setLocationStatus('warn', 'Location unavailable — you can still submit, but the report may not be mappable.');
+      }
+    );
+  } else {
+    setLocationStatus('warn', 'Your browser does not support location — you can still submit the report.');
+  }
+
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('photo');
+  const filenameEl = document.getElementById('dz-filename');
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) {
+      filenameEl.textContent = fileInput.files[0].name;
+      filenameEl.style.display = 'block';
     }
-  </script>
-</body>
-</html>
+  });
+
+  ['dragenter', 'dragover'].forEach((evt) => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      dropzone.classList.add('drag-active');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach((evt) => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-active');
+    });
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      filenameEl.textContent = e.dataTransfer.files[0].name;
+      filenameEl.style.display = 'block';
+    }
+  });
+
+  const successPopup = document.getElementById('successPopup');
+  if (successPopup) {
+    setTimeout(() => {
+      successPopup.classList.add('is-settling');
+      setTimeout(() => successPopup.remove(), 700);
+    }, 2000);
+  }
+</script>
+{% endblock %}

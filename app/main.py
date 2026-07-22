@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
+import folium
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 
@@ -16,6 +17,7 @@ from scripts.exif_extract import IMAGE_EXTENSIONS, extract_gps_and_timestamp  # 
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "static" / "uploads"
+HARARE = [-17.8252, 31.0335]
 
 
 def _parse_float(value):
@@ -41,23 +43,53 @@ def create_app() -> Flask:
     return app
 
 
+def build_dumping_map(reports: list[Report]) -> folium.Map:
+    """Render a Folium map with one marker per report, colored by review status."""
+    if reports:
+        center = [
+            sum(r.latitude for r in reports) / len(reports),
+            sum(r.longitude for r in reports) / len(reports),
+        ]
+    else:
+        center = HARARE
+
+    fmap = folium.Map(location=center, zoom_start=12)
+    status_colors = {"pending": "orange", "reviewed": "blue", "resolved": "green"}
+
+    for report in reports:
+        waste_types = ", ".join(sorted({d.waste_type for d in report.detections})) or "unclassified"
+        popup_html = (
+            f"<b>Report #{report.id}</b><br>"
+            f"Waste: {waste_types}<br>"
+            f"Status: {report.status}<br>"
+            f"Submitted: {report.submitted_at.isoformat()}"
+        )
+        folium.Marker(
+            location=[report.latitude, report.longitude],
+            popup=folium.Popup(popup_html, max_width=250),
+            icon=folium.Icon(color=status_colors.get(report.status, "gray"), icon="trash", prefix="fa"),
+        ).add_to(fmap)
+
+    return fmap
+
+
 def register_routes(app: Flask) -> None:
     @app.route("/")
     def index():
-        return render_template("index.html")
+        return render_template("index.html", active_page="home")
 
     @app.route("/report", methods=["GET", "POST"])
     def report():
         if request.method == "GET":
-            return render_template("upload.html")
+            return render_template("upload.html", active_page="report")
 
         photo = request.files.get("photo")
         if not photo or not photo.filename:
-            return render_template("upload.html", error="Please choose a photo to upload."), 400
+            return render_template("upload.html", active_page="report", error="Please choose a photo to upload."), 400
 
         suffix = Path(photo.filename).suffix.lower()
         if suffix not in IMAGE_EXTENSIONS:
-            return render_template("upload.html", error="Unsupported file type."), 400
+            return render_template("upload.html", active_page="report", error="Unsupported file type."), 400
 
         filename = f"{uuid.uuid4().hex}{suffix}"
         saved_path = UPLOAD_DIR / filename
@@ -113,11 +145,18 @@ def register_routes(app: Flask) -> None:
         if new_report.latitude is not None and detections:
             notify_new_report(new_report, detections)
 
-        return render_template("upload.html", success=True, detections=detections)
+        return render_template("upload.html", active_page="report", success=True, detections=detections)
 
     @app.route("/map")
     def map_view():
-        return render_template("map.html")
+        reports = Report.query.filter(Report.latitude.isnot(None)).all()
+        fmap = build_dumping_map(reports)
+        return render_template(
+            "map.html",
+            active_page="map",
+            map_html=fmap.get_root().render(),
+            report_count=len(reports),
+        )
 
     @app.route("/api/reports")
     def api_reports():

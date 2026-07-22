@@ -14,7 +14,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app.inference import load_model, run_inference, save_annotated_image  # noqa: E402
 from scripts.exif_extract import IMAGE_EXTENSIONS, extract_gps_and_timestamp  # noqa: E402
 
-
 def iter_image_paths(source: Path):
     if source.is_file():
         yield source
@@ -22,7 +21,6 @@ def iter_image_paths(source: Path):
         for path in sorted(source.rglob("*")):
             if path.suffix.lower() in IMAGE_EXTENSIONS:
                 yield path
-
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
