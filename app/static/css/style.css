@@ -393,8 +393,57 @@ img { max-width: 100%; display: block; }
 .hero-banner-half img.has-error { display: none; }
 .photo-placeholder.is-hidden { display: none; }
 
+/* ---------- Slideshow (fading crossfade + hover arrows) ---------- */
+
+.slideshow { position: relative; }
+
+.slideshow .slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 1s ease;
+}
+
+.slideshow .slide.is-active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.slide-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.slideshow:hover .slide-arrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.slide-arrow:hover { background: #fff; transform: translateY(-50%) scale(1.07); }
+.slide-arrow svg { width: 18px; height: 18px; }
+.slide-arrow-prev { left: 16px; }
+.slide-arrow-next { right: 16px; }
+
 .floating-badge {
   position: absolute;
+  z-index: 2;
   bottom: 22px;
   left: 22px;
   right: 22px;
@@ -515,16 +564,10 @@ img { max-width: 100%; display: block; }
 
 .report-banner .banner-scrim {
   position: absolute;
+  z-index: 2;
   inset: 0;
   background: linear-gradient(0deg, rgba(11, 30, 21, 0.82) 0%, rgba(11, 30, 21, 0.35) 55%, rgba(11, 30, 21, 0.15) 100%);
 }
-
-.report-banner .photo-placeholder {
-  background: linear-gradient(150deg, #0b8a4f, #12231b);
-  color: #fff;
-}
-
-.report-banner .photo-placeholder span { color: rgba(255,255,255,0.75); }
 
 .report-banner-content {
   position: relative;

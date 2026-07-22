@@ -52,21 +52,46 @@
         </div>
       </div>
 
-      <div class="hero-banner-half hero-banner-right">
-        <div class="photo-placeholder" data-fallback>
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 21c-4.4-3.4-7-6.8-7-10.5C5 6.5 8 4 12 4s7 2.5 7 6.5C19 14.2 16.4 17.6 12 21z" stroke="currentColor" stroke-width="1.4"/>
-            <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.4"/>
-          </svg>
-          <strong>Add hero-clean-community.jpg</strong>
-          <span>Drop a photo of happy people enjoying a clean environment into app/static/img/</span>
+      <div class="hero-banner-half hero-banner-right slideshow">
+        <div class="slide is-active">
+          <img
+            src="{{ url_for('static', filename='img/hero-clean-community.jpg') }}"
+            alt="Community members enjoying a clean, litter-free public space"
+            onerror="this.closest('.slide').style.display='none';"
+          >
         </div>
-        <img
-          src="{{ url_for('static', filename='img/hero-clean-community.jpg') }}"
-          alt="Community members enjoying a clean, litter-free public space"
-          onerror="this.classList.add('has-error'); this.closest('.hero-banner-right').querySelector('[data-fallback]').classList.remove('is-hidden');"
-          onload="this.closest('.hero-banner-right').querySelector('[data-fallback]').classList.add('is-hidden');"
-        >
+        <div class="slide">
+          <img
+            src="{{ url_for('static', filename='img/clean-africa-5.jpg') }}"
+            alt="Community members holding up the globe together"
+            onerror="this.closest('.slide').style.display='none';"
+          >
+        </div>
+        <div class="slide">
+          <img
+            src="{{ url_for('static', filename='img/clean-africa-6.jpg') }}"
+            alt="Hands holding a small globe"
+            onerror="this.closest('.slide').style.display='none';"
+          >
+        </div>
+        <div class="slide">
+          <img
+            src="{{ url_for('static', filename='img/Main3.jpg') }}"
+            alt="A clean neighborhood street"
+            onerror="this.closest('.slide').style.display='none';"
+          >
+        </div>
+
+        <button type="button" class="slide-arrow slide-arrow-prev" aria-label="Previous image">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button type="button" class="slide-arrow slide-arrow-next" aria-label="Next image">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
 
         <div class="floating-badge">
           <span class="badge-icon">
