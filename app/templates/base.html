@@ -35,9 +35,19 @@
         PlanetWatch
       </a>
       <div class="nav-links">
-        <a href="{{ url_for('index') }}" class="{{ 'active' if active_page == 'home' else '' }}">Home</a>
-        <a href="{{ url_for('report') }}" class="{{ 'active' if active_page == 'report' else '' }}">Report Dumping</a>
-        <a href="{{ url_for('map_view') }}" class="{{ 'active' if active_page == 'map' else '' }}">Live Map</a>
+        {% if active_page == 'login' %}
+          <a href="{{ url_for('map_view') }}">Live Map</a>
+          <a href="{{ url_for('about') }}">About Us</a>
+          {% if auth_mode != 'signin' %}
+            <span class="nav-auth-hint">Already have an account? <a href="{{ url_for('login', mode='signin', next=next_url) }}">Sign In</a></span>
+          {% endif %}
+        {% else %}
+          <a href="{{ url_for('index') }}" class="{{ 'active' if active_page == 'home' else '' }}">Home</a>
+          <a href="{{ url_for('report') }}" class="{{ 'active' if active_page == 'report' else '' }}">Report Dumping</a>
+          <a href="{{ url_for('map_view') }}" class="{{ 'active' if active_page == 'map' else '' }}">Live Map</a>
+          <a href="{{ url_for('about') }}" class="{{ 'active' if active_page == 'about' else '' }}">About Us</a>
+          <a href="{{ url_for('profile') }}" class="nav-profile {{ 'active' if active_page == 'profile' else '' }}">Profile</a>
+        {% endif %}
       </div>
     </div>
   </nav>

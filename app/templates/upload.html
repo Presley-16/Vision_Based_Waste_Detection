@@ -117,6 +117,13 @@
       <h2>Submit your report</h2>
       <p class="form-sub">Every report helps direct cleanup crews faster.</p>
 
+      {% if citizen %}
+        <span class="location-pill ok" style="margin-bottom: 22px;">
+          <span class="dot"></span> Reporting as {{ citizen.name }} {{ citizen.surname }} &middot;
+          <a href="{{ url_for('logout') }}" style="text-decoration: underline;">not you?</a>
+        </span>
+      {% endif %}
+
       {% if error %}
         <div class="alert alert-error">
           <img src="{{ url_for('static', filename='img/icons/warning.png') }}" alt="">
@@ -169,7 +176,7 @@
 
         <div class="field">
           <label for="contact">Your contact (optional, for follow-up)</label>
-          <input type="text" id="contact" name="contact" placeholder="Phone or email">
+          <input type="text" id="contact" name="contact" placeholder="Phone or email" value="{{ citizen.phone if citizen else '' }}">
         </div>
 
         <input type="hidden" id="latitude" name="latitude">

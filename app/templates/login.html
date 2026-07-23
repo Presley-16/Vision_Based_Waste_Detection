@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Sign In' if auth_mode == 'signin' else 'Sign Up' }} — PlanetWatch{% endblock %}
+
+{% block content %}
+<div class="container">
+  {% if auth_mode == 'signin' %}
+
+    <div class="auth-banner auth-banner-slim">
+      <div class="photo-placeholder" data-fallback>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21c-4.4-3.4-7-6.8-7-10.5C5 6.5 8 4 12 4s7 2.5 7 6.5C19 14.2 16.4 17.6 12 21z" stroke="currentColor" stroke-width="1.4"/>
+          <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.4"/>
+        </svg>
+        <strong>Add welcome1.jpg</strong>
+        <span>Drop a welcome photo into app/static/img/</span>
+      </div>
+      <img
+        src="{{ url_for('static', filename='img/welcome1.jpg') }}"
+        alt="Welcome to PlanetWatch"
+        onerror="this.classList.add('has-error'); this.closest('.auth-banner').querySelector('[data-fallback]').classList.remove('is-hidden');"
+        onload="this.closest('.auth-banner').querySelector('[data-fallback]').classList.add('is-hidden');"
+      >
+      <div class="auth-banner-scrim"></div>
+
+      <div class="auth-banner-content">
+        <span class="eyebrow"><span class="dot"></span> Welcome back</span>
+        <h2>Welcome back, valued citizen.</h2>
+        <p>Sign in to keep your country clean &mdash; open the Live Map to see exactly what's pending, reviewed, or resolved.</p>
+
+        <div class="auth-form-card">
+          <h3>Sign In to PlanetWatch</h3>
+          <p class="form-sub">Enter your first name and surname to continue.</p>
+
+          {% if error %}
+            <div class="alert alert-error">
+              <img src="{{ url_for('static', filename='img/icons/warning.png') }}" alt="">
+              <div>
+                <strong>Couldn't sign in</strong>
+                <p>{{ error }}</p>
+              </div>
+            </div>
+          {% endif %}
+
+          <form action="{{ url_for('login') }}" method="post">
+            <input type="hidden" name="mode" value="signin">
+            <input type="hidden" name="next" value="{{ next_url }}">
+
+            <div class="field">
+              <label for="name">First name</label>
+              <input type="text" id="name" name="name" placeholder="Jane" required value="{{ request.form.get('name', '') }}">
+            </div>
+            <div class="field">
+              <label for="surname">Surname</label>
+              <input type="text" id="surname" name="surname" placeholder="Moyo" required value="{{ request.form.get('surname', '') }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  {% else %}
+
+    <div class="login-shell">
+      <div class="login-visual">
+        <div class="photo-placeholder" data-fallback>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21c-4.4-3.4-7-6.8-7-10.5C5 6.5 8 4 12 4s7 2.5 7 6.5C19 14.2 16.4 17.6 12 21z" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.4"/>
+          </svg>
+          <strong>Add welcome1.jpg</strong>
+          <span>Drop a welcome photo into app/static/img/</span>
+        </div>
+        <img
+          src="{{ url_for('static', filename='img/welcome1.jpg') }}"
+          alt="Welcome to PlanetWatch"
+          onerror="this.classList.add('has-error'); this.closest('.login-visual').querySelector('[data-fallback]').classList.remove('is-hidden');"
+          onload="this.closest('.login-visual').querySelector('[data-fallback]').classList.add('is-hidden');"
+        >
+        <div class="login-visual-scrim"></div>
+        <div class="login-visual-content">
+          <span class="eyebrow"><span class="dot"></span> Community identity</span>
+          <h2>One profile. Every report, tracked.</h2>
+          <p>Sign Up once so we can follow up on your reports, keep your contact details ready, and show you exactly what's pending, reviewed, or resolved.</p>
+        </div>
+      </div>
+
+      <div class="login-form-panel">
+        <img
+          class="login-form-bg"
+          src="{{ url_for('static', filename='img/login.jpg') }}"
+          alt=""
+          onerror="this.style.display='none';"
+        >
+        <div class="login-form-scrim"></div>
+
+        <div class="form-card login-card">
+          <h2>Sign Up for PlanetWatch</h2>
+          <p class="form-sub">Enter your details to continue &mdash; We will remember you for next time.</p>
+
+          {% if error %}
+            <div class="alert alert-error">
+              <img src="{{ url_for('static', filename='img/icons/warning.png') }}" alt="">
+              <div>
+                <strong>Couldn't sign up</strong>
+                <p>{{ error }}</p>
+              </div>
+            </div>
+          {% endif %}
+
+          <form action="{{ url_for('login') }}" method="post">
+            <input type="hidden" name="mode" value="signup">
+            <input type="hidden" name="next" value="{{ next_url }}">
+
+            <div class="field">
+              <label for="name">First name</label>
+              <input type="text" id="name" name="name" placeholder="Jane" required value="{{ request.form.get('name', '') }}">
+            </div>
+            <div class="field">
+              <label for="surname">Surname</label>
+              <input type="text" id="surname" name="surname" placeholder="Moyo" required value="{{ request.form.get('surname', '') }}">
+            </div>
+            <div class="field">
+              <label for="address">Address</label>
+              <input type="text" id="address" name="address" placeholder="12 Baines Avenue, Harare" value="{{ request.form.get('address', '') }}">
+            </div>
+            <div class="field">
+              <label for="phone">Phone number</label>
+              <input type="text" id="phone" name="phone" placeholder="+263 77 123 4567" required value="{{ request.form.get('phone', '') }}">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  {% endif %}
+</div>
+{% endblock %}
