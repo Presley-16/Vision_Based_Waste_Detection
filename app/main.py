@@ -1,5 +1,6 @@
 """Flask app entry point — serves the GIS dashboard and citizen reporting site."""
 import os
+import secrets
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -27,10 +28,12 @@ def _parse_float(value):
     except (TypeError, ValueError):
         return None
 
-
 def create_app() -> Flask:
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY", "dev")
+    # A fresh random key each process start invalidates every previously-issued
+    # session cookie, so restarting the server always forces a new sign-in —
+    # set FLASK_SECRET_KEY explicitly to opt back into surviving restarts.
+    app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY") or secrets.token_hex(32)
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///reports.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -49,7 +52,6 @@ def create_app() -> Flask:
 
     register_routes(app)
     return app
-
 
 def build_dumping_map(reports: list[Report]) -> folium.Map:
     """Render a Folium map with one marker per report, colored by review status."""
@@ -134,8 +136,11 @@ def register_routes(app: Flask) -> None:
             ), 400
 
         if auth_mode == "signin":
-            if not name or not surname:
-                return render_error("Please enter your first name and surname.")
+            # Sign In is intentionally lenient: whatever is typed gets you in,
+            # matching an existing citizen if one exists or creating a minimal
+            # one on the fly so every visit is still tracked in the database.
+            name = name or "Guest"
+            surname = surname or "Citizen"
 
             citizen = Citizen.query.filter(
                 db.func.lower(Citizen.name) == name.lower(),
@@ -143,7 +148,9 @@ def register_routes(app: Flask) -> None:
             ).first()
 
             if not citizen:
-                return render_error("We couldn't find an account with that name. Please sign up first.")
+                citizen = Citizen(name=name, surname=surname, address="", phone="")
+                db.session.add(citizen)
+                db.session.commit()
 
             session["citizen_id"] = citizen.id
             return redirect(next_url)
