@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12a862">
+  <title>Report Dumping — PlanetWatch</title>
+  <link rel="icon" type="image/jpeg" href="img/clean-africa-2.jpg">
+  <link rel="apple-touch-icon" href="img/app/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+</head>
+<body data-page="report" data-auth="required" data-location="required">
+  <script src="js/layout.js"></script>
+
+<div class="container">
+  <div class="report-banner slideshow">
+    <div class="slide is-active">
+      <img src="img/hero-cleanup-crowd.jpg" alt="Cleanup crew clearing an illegal dumping site" onerror="this.closest('.slide').style.display='none';">
+    </div>
+    <div class="slide">
+      <img src="img/good-bye-waste.jpg" alt="Waste collection crew handling a pickup" onerror="this.closest('.slide').style.display='none';">
+    </div>
+    <div class="slide">
+      <img src="img/magheva.jpg" alt="Waste collection crew at work" onerror="this.closest('.slide').style.display='none';">
+    </div>
+    <div class="slide">
+      <img src="img/Main2.jpg" alt="Waste collection crew loading a truck" style="object-position: center top;" onerror="this.closest('.slide').style.display='none';">
+    </div>
+    <div class="banner-scrim"></div>
+
+    <button type="button" class="slide-arrow slide-arrow-prev" aria-label="Previous image">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button type="button" class="slide-arrow slide-arrow-next" aria-label="Next image">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="report-banner-content">
+      <span class="eyebrow"><span class="dot"></span> Community report</span>
+      <h1>Report Illegal Dumping</h1>
+      <p>Take photos of the site — they're pinned to where you're standing, classified by our model, and routed to the cleanup map.</p>
+    </div>
+  </div>
+
+  <div class="report-layout">
+    <div class="steps-card">
+      <h3>Before you submit</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Keep location on</strong>
+          <span>Your current position is pinned on the map automatically &mdash; location must stay on to report.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Take clear photos</strong>
+          <span>Capture the waste from a distance that shows the full scale of the site. Add as many as you need.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Add contact (optional)</strong>
+          <span>Leave a way to reach you if the cleanup team needs more detail.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Submit</strong>
+          <span>The AI classifies the waste type and every photo appears on the live map at its pinned location.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>Enjoy Cleanliness</strong>
+          <span>Live in a clean and healthy environment.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h2>Submit your report</h2>
+      <p class="form-sub">Every report helps direct cleanup crews faster.</p>
+
+      <span class="location-pill ok" style="margin-bottom: 22px;" id="reportingAs" hidden>
+        <span class="dot"></span> Reporting as <span data-name></span> &middot;
+        <a href="#" data-logout style="text-decoration: underline;">not you?</a>
+      </span>
+
+      <div class="alert alert-error" id="errorBox" hidden>
+        <img src="img/icons/warning.png" alt="">
+        <div>
+          <strong>Couldn't submit report</strong>
+          <p data-error-text></p>
+        </div>
+      </div>
+
+      <div class="alert alert-success" id="successBox" hidden>
+        <img src="img/icons/success.png" alt="">
+        <div>
+          <strong data-success-title>Thanks — your report was submitted.</strong>
+          <div data-success-body></div>
+        </div>
+      </div>
+
+      <span id="location-status" class="location-pill">
+        <span class="dot"></span> Finding your current location&hellip;
+      </span>
+
+      <div class="field">
+        <label>Your pinned location</label>
+        <div class="pin-map-wrap">
+          <div class="pin-map" id="pinMap"></div>
+        </div>
+        <div class="pin-coords">
+          <span id="pinCoords">Waiting for a location fix&hellip;</span>
+          <a href="map.html" style="color: #2563eb; text-decoration: underline;">Open Live Map</a>
+        </div>
+      </div>
+
+      <form id="reportForm">
+        <div class="field">
+          <label for="photo">Photos of the dumping site</label>
+          <div class="dropzone" id="dropzone">
+            <div class="dz-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <strong>Click to upload or drag photos here</strong>
+            <span>JPG or PNG &middot; each photo is pinned to your current location</span>
+            <input type="file" id="photo" accept="image/*" multiple>
+          </div>
+          <div class="capture-actions">
+            <label class="btn btn-ghost" for="cameraInput">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 8a2 2 0 0 1 2-2h1.2l.8-1.4A2 2 0 0 1 9.7 3.6h4.6a2 2 0 0 1 1.7 1L17 6h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.6"/>
+              </svg>
+              Take photo
+            </label>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment">
+          </div>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+
+        <div class="field">
+          <label for="contact">Your contact (optional, for follow-up)</label>
+          <input type="text" id="contact" name="contact" placeholder="Phone or email" inputmode="email">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn" disabled>Submit Report</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="js/slideshow.js" defer></script>
+  <script src="js/location-guard.js"></script>
+  <script src="js/map-pins.js"></script>
+  <script src="js/pages/report.js"></script>
+</body>
+</html>

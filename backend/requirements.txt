@@ -1,0 +1,8 @@
+flask>=3.0.0
+flask-sqlalchemy>=3.1.0
+pillow>=10.0.0
+python-dotenv>=1.0.0
+twilio>=9.0.0
+qrcode>=7.4
+# YOLO inference comes from the sibling model/ package
+-r ../model/requirements.txt

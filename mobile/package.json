@@ -1,0 +1,22 @@
+{
+  "name": "planetwatch-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PlanetWatch citizen reporting app for Android and iOS — bundles the frontend/ website via Capacitor.",
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync-web.mjs && cap sync",
+    "build:android": "node scripts/build-android.mjs",
+    "open:android": "node scripts/sync-web.mjs && cap sync android && cap open android",
+    "open:ios": "node scripts/sync-web.mjs && cap sync ios && cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/ios": "^8.6.0",
+    "@capacitor/share": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.0"
+  }
+}

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12a862">
+  <title>Install the App — PlanetWatch</title>
+  <link rel="icon" type="image/jpeg" href="img/clean-africa-2.jpg">
+  <link rel="apple-touch-icon" href="img/app/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+</head>
+<body data-page="install" data-auth="optional">
+  <script src="js/layout.js"></script>
+
+<div class="container">
+  <div class="report-banner">
+    <img src="img/clean-africa-5.jpg" alt="Community members holding up the globe together" onerror="this.style.display='none';">
+    <div class="banner-scrim"></div>
+    <div class="report-banner-content">
+      <span class="eyebrow"><span class="dot"></span> PlanetWatch app</span>
+      <h1>Install PlanetWatch on your phone</h1>
+      <p>Report dumping on the go &mdash; the app works exactly like this website. Pick whichever install option suits you.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-error" id="apkMissing" hidden>
+    <img src="img/icons/warning.png" alt="">
+    <div>
+      <strong>The Android app hasn't been built yet</strong>
+      <p>Build it once with <code>npm run build:android</code> in the <code>mobile/</code> folder &mdash; see mobile/README.md. iPhones can still add PlanetWatch from the QR code.</p>
+    </div>
+  </div>
+
+  <div class="install-grid">
+    <!-- Option 1: QR code -->
+    <div class="install-option" id="qrOption">
+      <span class="install-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <div class="install-option-head">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3.5" y="3.5" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.6"/>
+            <rect x="14.5" y="3.5" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.6"/>
+            <rect x="3.5" y="14.5" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M14.5 14.5h2.5v2.5h-2.5zM18 18h2.5v2.5H18zM14.5 18.5v2M18.5 14.5h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h2>Install by scanning this QR code</h2>
+          <p>Android &amp; iPhone &middot; no cable needed</p>
+        </div>
+      </div>
+
+      <div class="qr-box" id="qrBox" aria-label="QR code to install PlanetWatch"></div>
+      <a class="install-link" id="qrLink" href="#"></a>
+
+      <ol class="install-steps">
+        <li><span>Open the <strong>camera</strong> on your phone and point it at the QR code, then tap the link that appears.</span></li>
+        <li><span><strong>Android:</strong> tap <strong>Download for Android</strong>, open <strong>PlanetWatch.apk</strong> and tap <strong>Install</strong> (allow &ldquo;Install unknown apps&rdquo; if asked).</span></li>
+        <li><span><strong>iPhone:</strong> tap the <strong>Share</strong> button in Safari, then <strong>Add to Home Screen</strong>.</span></li>
+        <li><span>Make sure your phone is on the <strong>same Wi&#8209;Fi</strong> as this computer.</span></li>
+      </ol>
+
+      <span class="location-pill install-status waiting" id="qrStatus">
+        <span class="dot"></span> Waiting for a phone to scan&hellip;
+      </span>
+    </div>
+
+    <!-- Option 2: USB cable -->
+    <div class="install-option" id="usbOption">
+      <span class="install-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <div class="install-option-head">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 3.5h6v5H9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M10.5 3.5v-1M13.5 3.5v-1M8 8.5h8l-1 5h-6zM12 13.5v8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <h2>Install with a USB cable</h2>
+          <p>Android phones &middot; connect to this computer</p>
+        </div>
+      </div>
+
+      <ol class="install-steps">
+        <li><span>On your phone open <strong>Settings &rarr; About phone</strong> and tap <strong>Build number</strong> 7 times to unlock Developer options.</span></li>
+        <li><span>Go to <strong>Settings &rarr; System &rarr; Developer options</strong> and switch on <strong>USB debugging</strong>.</span></li>
+        <li><span>Connect your phone to this computer with a <strong>USB cable</strong>.</span></li>
+        <li><span>Scroll down from the top of your phone's screen, tap the <strong>&ldquo;Charging this device via USB&rdquo;</strong> notification and select <strong>File transfer</strong>.</span></li>
+        <li><span>Tap <strong>Allow</strong> when your phone asks &ldquo;Allow USB debugging?&rdquo;.</span></li>
+        <li><span>When the <strong>green check</strong> appears, click <strong>Install app</strong>.</span></li>
+      </ol>
+
+      <span class="location-pill install-status waiting" id="usbStatus">
+        <span class="dot"></span> Checking for a connected phone&hellip;
+      </span>
+      <button type="button" class="btn btn-primary btn-block" id="usbInstallBtn" disabled>Install app</button>
+      <p class="install-note">iPhone? Use the QR code &mdash; Apple doesn't allow installing apps over a cable without Xcode.</p>
+    </div>
+  </div>
+</div>
+
+  <script src="js/pages/install.js"></script>
+</body>
+</html>

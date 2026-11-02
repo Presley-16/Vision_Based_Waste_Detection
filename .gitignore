@@ -1,13 +1,23 @@
+# Python
 venv/
 __pycache__/
 *.pyc
-.env
-raw_images/
-dataset/
-datasets/
-*.pt
-runs/
-*.db
 .ipynb_checkpoints/
-app/static/uploads/
-instance/
+.env
+
+# backend runtime data
+*.db
+backend/instance/
+backend/uploads/
+
+# model data + weights
+*.pt
+model/raw_images/
+model/dataset/
+model/datasets/
+model/runs/
+
+# mobile build output (www/ is regenerated from frontend/ on every build)
+mobile/node_modules/
+mobile/www/
+mobile/dist/

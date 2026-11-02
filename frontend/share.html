@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12a862">
+  <title>Share PlanetWatch</title>
+  <link rel="icon" type="image/jpeg" href="img/clean-africa-2.jpg">
+  <link rel="apple-touch-icon" href="img/app/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+</head>
+<body data-page="share" data-auth="required" data-location="required">
+  <script src="js/layout.js"></script>
+
+<div class="container">
+  <div class="report-banner">
+    <img src="img/cheer.jpg" alt="Community members celebrating a clean neighbourhood" onerror="this.style.display='none';">
+    <div class="banner-scrim"></div>
+    <div class="report-banner-content">
+      <span class="eyebrow"><span class="dot"></span> Spread the word</span>
+      <h1>Invite others to PlanetWatch</h1>
+      <p>The more eyes on illegal dumping, the faster it gets cleaned up. Send your friends and neighbours the link.</p>
+    </div>
+  </div>
+
+  <div class="form-card share-card">
+    <h2>Share the PlanetWatch link</h2>
+    <p class="form-sub">Anyone who opens this link can get PlanetWatch on their phone.</p>
+
+    <div class="share-link-box">
+      <input type="text" id="shareLink" readonly value="Loading link…" aria-label="PlanetWatch invite link">
+      <button type="button" class="btn btn-ghost" id="copyBtn">Copy</button>
+    </div>
+
+    <button type="button" class="btn btn-primary btn-block" id="shareBtn" style="margin-bottom: 10px;">
+      Share link
+    </button>
+
+    <div class="share-actions">
+      <a class="btn btn-ghost" id="whatsappLink" href="#">WhatsApp</a>
+      <a class="btn btn-ghost" id="smsLink" href="#">SMS</a>
+      <a class="btn btn-ghost" id="emailLink" href="#">Email</a>
+      <a class="btn btn-ghost" id="facebookLink" href="#">Facebook</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/location-guard.js"></script>
+  <script src="js/pages/share.js"></script>
+</body>
+</html>

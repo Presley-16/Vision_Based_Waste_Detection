@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monitoring Dashboard — PlanetWatch Municipal</title>
+  <link rel="icon" type="image/jpeg" href="img/clean-africa-2.jpg">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script src="js/common.js"></script>
+  <script>if (!MUNI.getToken()) location.replace('index.html');</script>
+</head>
+<body>
+  <div class="page-loader" id="pageLoader">
+    <img src="img/clean-africa-3.jpg" alt="PlanetWatch" onerror="this.remove();">
+  </div>
+
+  <nav class="site-nav">
+    <div class="container">
+      <a class="brand" href="dashboard.html">
+        <span class="brand-mark">
+          <img class="brand-logo" src="img/clean-africa-2.jpg" alt="PlanetWatch logo" onerror="this.remove();">
+        </span>
+        PlanetWatch <span class="brand-tag">Municipal</span>
+      </a>
+      <div class="muni-nav-actions">
+        <span class="muni-user" id="muniUser"></span>
+        <button type="button" class="btn btn-ghost btn-sm" id="logoutBtn">Sign out</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container muni-shell">
+    <div class="map-header">
+      <div>
+        <span class="eyebrow"><span class="dot"></span> Municipal monitoring</span>
+        <h1 class="muni-title">Flagged dumping sites</h1>
+        <p class="muni-sub" id="lastUpdated">Loading reports&hellip;</p>
+      </div>
+      <button type="button" class="btn btn-ghost" id="refreshBtn">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4.5h-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <div class="muni-stats" role="tablist" aria-label="Filter reports by status">
+      <button type="button" class="muni-stat is-active" data-filter="all" role="tab" aria-selected="true">
+        <span class="muni-stat-label"><span class="swatch" style="background: var(--text);"></span> All</span>
+        <span class="muni-stat-num" data-count="all">&ndash;</span>
+      </button>
+      <button type="button" class="muni-stat" data-filter="pending" role="tab" aria-selected="false">
+        <span class="muni-stat-label"><span class="swatch" style="background: #f6b93b;"></span> Pending</span>
+        <span class="muni-stat-num" data-count="pending">&ndash;</span>
+      </button>
+      <button type="button" class="muni-stat" data-filter="solved" role="tab" aria-selected="false">
+        <span class="muni-stat-label"><span class="swatch" style="background: #12a862;"></span> Solved</span>
+        <span class="muni-stat-num" data-count="solved">&ndash;</span>
+      </button>
+    </div>
+
+    <div class="muni-layout">
+      <div class="map-card">
+        <div class="leaflet-map muni-map" id="muniMap" role="region" aria-label="Map of flagged locations"></div>
+      </div>
+      <div class="muni-list" id="reportList" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

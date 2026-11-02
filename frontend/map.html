@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12a862">
+  <title>Live Dumping Map — PlanetWatch</title>
+  <link rel="icon" type="image/jpeg" href="img/clean-africa-2.jpg">
+  <link rel="apple-touch-icon" href="img/app/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+</head>
+<body data-page="map" data-auth="optional" data-location="required">
+  <script src="js/layout.js"></script>
+
+<div class="container map-shell">
+  <div class="map-header">
+    <div>
+      <span class="eyebrow"><span class="dot"></span> Live hotspot map</span>
+      <h1 style="margin: 10px 0 0; font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em;" id="reportCount">
+        Loading reports&hellip;
+      </h1>
+    </div>
+    <div class="map-legend">
+      <span><span class="swatch" style="background:#f6b93b;"></span> Pending</span>
+      <span><span class="swatch" style="background:#2563eb;"></span> Reviewed</span>
+      <span><span class="swatch" style="background:#12a862;"></span> Resolved</span>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="leaflet-map" id="liveMap" role="region" aria-label="Illegal dumping hotspot map"></div>
+  </div>
+
+  <div class="my-reports-section">
+    <div class="my-reports-header">
+      <div>
+        <span class="eyebrow"><span class="dot"></span> Your reports</span>
+        <h2 style="margin: 10px 0 0; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;" id="myReportsTitle">
+          Track your reports
+        </h2>
+      </div>
+    </div>
+
+    <div id="myReports"></div>
+  </div>
+</div>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="js/location-guard.js"></script>
+  <script src="js/map-pins.js"></script>
+  <script src="js/pages/map.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PlanetWatch</string>
+    <string name="title_activity_main">PlanetWatch</string>
+    <string name="package_name">com.planetwatch.app</string>
+    <string name="custom_url_scheme">com.planetwatch.app</string>
+</resources>

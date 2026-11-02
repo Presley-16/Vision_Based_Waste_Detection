@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12a862">
+  <title>Sign Up — PlanetWatch</title>
+  <link rel="icon" type="image/jpeg" href="img/clean-africa-2.jpg">
+  <link rel="apple-touch-icon" href="img/app/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+</head>
+<body data-page="login" data-auth="none">
+  <script src="js/layout.js"></script>
+
+<div class="container">
+  <div class="auth-banner auth-banner-slim" data-mode="signin" hidden>
+    <div class="photo-placeholder" data-fallback>
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 21c-4.4-3.4-7-6.8-7-10.5C5 6.5 8 4 12 4s7 2.5 7 6.5C19 14.2 16.4 17.6 12 21z" stroke="currentColor" stroke-width="1.4"/>
+        <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.4"/>
+      </svg>
+      <strong>Add welcome1.jpg</strong>
+      <span>Drop a welcome photo into frontend/img/</span>
+    </div>
+    <img
+      src="img/welcome1.jpg"
+      alt="Welcome to PlanetWatch"
+      onerror="this.classList.add('has-error'); this.closest('.auth-banner').querySelector('[data-fallback]').classList.remove('is-hidden');"
+      onload="this.closest('.auth-banner').querySelector('[data-fallback]').classList.add('is-hidden');"
+    >
+    <div class="auth-banner-scrim"></div>
+
+    <div class="auth-banner-content">
+      <span class="eyebrow"><span class="dot"></span> Welcome back</span>
+      <h2>Welcome back, valued citizen.</h2>
+      <p>Sign in to keep your country clean &mdash; open the Live Map to see exactly what's pending, reviewed, or resolved.</p>
+
+      <div class="auth-form-card">
+        <h3>Sign In to PlanetWatch</h3>
+        <p class="form-sub">Enter your first name and surname to continue.</p>
+
+        <div class="alert alert-error" data-error hidden>
+          <img src="img/icons/warning.png" alt="">
+          <div>
+            <strong>Couldn't sign in</strong>
+            <p data-error-text></p>
+          </div>
+        </div>
+
+        <form data-auth-form="signin">
+          <div class="field">
+            <label for="signin-name">First name</label>
+            <input type="text" id="signin-name" name="name" placeholder="Jane" required autocomplete="given-name">
+          </div>
+          <div class="field">
+            <label for="signin-surname">Surname</label>
+            <input type="text" id="signin-surname" name="surname" placeholder="Moyo" required autocomplete="family-name">
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+        </form>
+
+        <div data-install-block>
+          <div class="auth-install">Get PlanetWatch on your phone</div>
+          <a href="install.html" class="btn btn-ghost btn-block btn-install">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6.5" y="2.5" width="11" height="19" rx="2.6" stroke="currentColor" stroke-width="1.7"/><path d="M10.5 18.2h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            Install application
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-shell" data-mode="signup" hidden>
+    <div class="login-visual">
+      <div class="photo-placeholder" data-fallback>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21c-4.4-3.4-7-6.8-7-10.5C5 6.5 8 4 12 4s7 2.5 7 6.5C19 14.2 16.4 17.6 12 21z" stroke="currentColor" stroke-width="1.4"/>
+          <circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.4"/>
+        </svg>
+        <strong>Add welcome1.jpg</strong>
+        <span>Drop a welcome photo into frontend/img/</span>
+      </div>
+      <img
+        src="img/welcome1.jpg"
+        alt="Welcome to PlanetWatch"
+        onerror="this.classList.add('has-error'); this.closest('.login-visual').querySelector('[data-fallback]').classList.remove('is-hidden');"
+        onload="this.closest('.login-visual').querySelector('[data-fallback]').classList.add('is-hidden');"
+      >
+      <div class="login-visual-scrim"></div>
+      <div class="login-visual-content">
+        <span class="eyebrow"><span class="dot"></span> Community identity</span>
+        <h2>One profile. Every report, tracked.</h2>
+        <p>Sign Up once so we can follow up on your reports, keep your contact details ready, and show you exactly what's pending, reviewed, or resolved.</p>
+      </div>
+    </div>
+
+    <div class="login-form-panel">
+      <img class="login-form-bg" src="img/login.jpg" alt="" onerror="this.style.display='none';">
+      <div class="login-form-scrim"></div>
+
+      <div class="form-card login-card">
+        <h2>Sign Up for PlanetWatch</h2>
+        <p class="form-sub">Enter your details to continue &mdash; We will remember you for next time.</p>
+
+        <div class="alert alert-error" data-error hidden>
+          <img src="img/icons/warning.png" alt="">
+          <div>
+            <strong>Couldn't sign up</strong>
+            <p data-error-text></p>
+          </div>
+        </div>
+
+        <form data-auth-form="signup">
+          <div class="field">
+            <label for="name">First name</label>
+            <input type="text" id="name" name="name" placeholder="Jane" required autocomplete="given-name">
+          </div>
+          <div class="field">
+            <label for="surname">Surname</label>
+            <input type="text" id="surname" name="surname" placeholder="Moyo" required autocomplete="family-name">
+          </div>
+          <div class="field">
+            <label for="address">Address</label>
+            <input type="text" id="address" name="address" placeholder="12 Baines Avenue, Harare" autocomplete="street-address">
+          </div>
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input type="text" id="phone" name="phone" placeholder="+263 77 123 4567" required autocomplete="tel" inputmode="tel">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+        </form>
+
+        <div data-install-block>
+          <div class="auth-install">Get PlanetWatch on your phone</div>
+          <a href="install.html" class="btn btn-ghost btn-block btn-install">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6.5" y="2.5" width="11" height="19" rx="2.6" stroke="currentColor" stroke-width="1.7"/><path d="M10.5 18.2h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            Install application
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="js/pages/login.js"></script>
+</body>
+</html>

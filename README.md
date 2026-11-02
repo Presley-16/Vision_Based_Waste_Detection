@@ -1,41 +1,57 @@
 # Vision-Based Illegal Waste Detection and Reporting
 
 YOLOv11-based system for detecting illegal waste dumping from geotagged smartphone
-images, with a Flask backend serving a GIS dashboard and a citizen reporting website.
+images: citizens report from the website or mobile app, municipal teams monitor and
+act on reports from their own dashboard.
 
 ## Structure
 
-- `raw_images/` — unannotated iPhone photos (dataset collection)
-- `dataset/` — Roboflow-exported annotated dataset
-- `models/` — trained YOLOv11 weight files (`best.pt`)
-- `notebooks/` — experimentation notebooks
-- `scripts/` — standalone scripts (`exif_extract.py`, `detect.py`, `train.py`)
-- `app/` — Flask backend (GIS dashboard + citizen reporting site)
+Each part is its own codebase in its own folder:
 
-## Setup
+| Folder | What it is | Tech |
+| --- | --- | --- |
+| [`backend/`](backend/) | JSON API: auth, reports, municipal actions, app distribution (QR / USB) | Flask, SQLite |
+| [`frontend/`](frontend/) | Citizen reporting website | Static HTML/CSS/JS + Leaflet |
+| [`municipal/`](municipal/) | Municipal monitoring dashboard | Static HTML/CSS/JS + Leaflet |
+| [`mobile/`](mobile/) | Android + iOS app, bundling `frontend/` so it behaves exactly like the website | Capacitor 8 |
+| [`model/`](model/) | YOLOv11 training, inference, EXIF tooling, weights, datasets | Ultralytics |
+
+## Quick start
 
 ```
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
+python backend/run.py
 ```
+
+That serves everything on port 5000:
+
+- Citizen website: http://localhost:5000/
+- Municipal dashboard: http://localhost:5000/municipal/ (login from `MUNICIPAL_USERNAME` / `MUNICIPAL_PASSWORD`, default `admin` / `planetwatch`; change these before real use)
+- Install page (QR code + USB): http://localhost:5000/install.html
 
 Copy `.env` and fill in secret values (email password, Twilio credentials, API keys) before running.
 
+## Location is mandatory
+
+Signed-in citizens must keep device location on. If it's off or blocked, a blocking popup
+asks them to switch it on. The Report page pins the current location on a map and tags
+every photo with it.
+
+Browsers only share location on **https** or `localhost`. Phones visiting the website over
+plain `http://192.168.x.x` won't get a location. Serve the backend over HTTPS (for
+example a tunnel such as `cloudflared tunnel --url http://localhost:5000`) and set
+`PUBLIC_BASE_URL` to that address. The Android app is not affected, because its pages
+load from the app itself.
+
 ## GPU
 
-PyTorch auto-detected a CUDA-capable GPU on this machine (`torch.cuda.is_available() == True`),
-8GB VRAM. `scripts/train.py` and `app/inference.py` will use it automatically via Ultralytics —
-no `device=0` flag needed unless you want to force it explicitly.
+PyTorch detects the CUDA GPU on this machine (8GB VRAM). `model/train.py` and
+`model/inference.py` use it automatically through Ultralytics.
 
 ## Alerts
 
-Email alerts use Gmail SMTP; SMS alerts use Twilio. Both are optional — `app/alerts.py` skips
-silently with a warning if their `.env` credentials aren't set, so the rest of the app keeps
-working before those accounts are provisioned.
-
-## Citizen reporting site
-
-The `/report` form captures location via the browser's Geolocation API (not EXIF) — the
-iPhone-native EXIF pipeline (`scripts/exif_extract.py`) is for your own training-data
-collection, not for photos submitted through the website.
+Email alerts use Gmail SMTP and SMS alerts use Twilio. Both are optional:
+`backend/planetwatch/alerts.py` logs a warning and skips them if their `.env`
+credentials aren't set.

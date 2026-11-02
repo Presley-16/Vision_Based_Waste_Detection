@@ -1,0 +1,190 @@
+/* Municipal dashboard — builds on the shared PlanetWatch design system in style.css */
+
+.brand-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+input[type="password"] {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-tint);
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+input[type="password"]:focus { outline: none; border-color: var(--primary); background: #fff; }
+
+.muni-nav-actions { display: flex; align-items: center; gap: 12px; }
+.muni-user { font-size: 0.88rem; font-weight: 700; color: var(--text-muted); }
+
+.muni-shell { padding: 36px 0 80px; }
+.muni-title { margin: 10px 0 4px; font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; }
+.muni-sub { margin: 0; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+
+/* ---------- Status filter (stat cards double as tabs) ---------- */
+
+.muni-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.muni-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 18px 22px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  font: inherit;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.muni-stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+
+.muni-stat.is-active {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+  box-shadow: 0 0 0 4px rgba(18, 168, 98, 0.12);
+}
+
+.muni-stat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.muni-stat .swatch { width: 10px; height: 10px; border-radius: 50%; }
+.muni-stat-num { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+
+/* ---------- Map + list ---------- */
+
+.muni-layout {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.muni-map { height: 70vh; }
+
+.muni-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 4px 6px 4px 2px;
+}
+
+.muni-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
+  animation: pw-card-drop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.muni-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+.muni-card.is-selected { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12); }
+
+.muni-card.is-leaving {
+  animation: pw-card-sink 0.45s ease forwards;
+  pointer-events: none;
+}
+
+.muni-card-top { display: flex; gap: 14px; align-items: flex-start; }
+
+.muni-thumb {
+  width: 78px;
+  height: 78px;
+  border-radius: 14px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--surface-tint);
+}
+
+.muni-card-info { flex: 1; min-width: 0; }
+.muni-card-info strong { display: block; font-size: 0.98rem; margin-bottom: 4px; }
+
+.muni-meta {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.muni-meta b { color: var(--text); font-weight: 700; }
+.muni-card .status-pill { padding: 6px 12px; font-size: 0.78rem; align-self: flex-start; }
+
+.muni-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.muni-actions .btn { flex: 1 1 auto; }
+.muni-actions svg { width: 16px; height: 16px; }
+
+.muni-empty {
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 36px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* ---------- Delete confirmation (same ripple pop-up motion) ---------- */
+
+.confirm-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  padding: 28px;
+  text-align: center;
+  animation: pw-card-drop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.ripple-popup-overlay.is-settling .confirm-card { animation: pw-card-sink 0.6s ease forwards; }
+.confirm-card h3 { margin: 0 0 8px; font-size: 1.2rem; font-weight: 800; }
+.confirm-card p { margin: 0 0 22px; color: var(--text-muted); font-size: 0.92rem; }
+.confirm-actions { display: flex; gap: 10px; }
+.confirm-actions .btn { flex: 1; }
+
+@media (max-width: 960px) {
+  .muni-layout { grid-template-columns: 1fr; }
+  .muni-map { height: 55vh; }
+  .muni-list { max-height: none; overflow: visible; }
+}
+
+@media (max-width: 600px) {
+  .muni-stats { gap: 8px; }
+  .muni-stat { padding: 14px; }
+  .muni-stat-num { font-size: 1.5rem; }
+  .muni-user { display: none; }
+}
