@@ -60,6 +60,10 @@ def _apk_path() -> Path:
     return Path(current_app.config["APK_PATH"])
 
 
+def _ipa_path() -> Path:
+    return Path(current_app.config["APK_PATH"]).with_name("PlanetWatch.ipa")
+
+
 def _platform_from_user_agent(user_agent: str) -> str:
     ua = user_agent.lower()
     if "android" in ua:
@@ -106,6 +110,9 @@ def info():
         "apk_available": apk.exists(),
         "apk_size_mb": round(apk.stat().st_size / 1_048_576, 1) if apk.exists() else None,
         "qr_svg": _qr_svg(page_url),
+        "ipa_url": f"{base_url}/download/PlanetWatch.ipa",
+        "ipa_available": _ipa_path().exists(),
+        "https": base_url.startswith("https://"),
         "usb_supported": _is_local_request(),
     })
 
@@ -149,6 +156,14 @@ def download_apk():
         as_attachment=True,
         download_name="PlanetWatch.apk",
     )
+
+
+@install.get("/download/PlanetWatch.ipa")
+def download_ipa():
+    ipa = _ipa_path()
+    if not ipa.exists():
+        abort(404, description="The iOS app has not been built yet — see mobile/README.md.")
+    return send_file(ipa, mimetype="application/octet-stream", as_attachment=True, download_name="PlanetWatch.ipa")
 
 
 # ---------- USB / ADB ----------
@@ -207,12 +222,82 @@ def _list_devices(adb: str) -> list[dict]:
         fields = rest.split()
         state = fields[0] if fields else "unknown"
         props = dict(field.split(":", 1) for field in fields[1:] if ":" in field)
+        # Only real phones count — a running Android Studio emulator would
+        # otherwise get the green check and receive the install instead.
+        if serial.startswith("emulator-") or props.get("model", "").startswith("sdk_"):
+            continue
         devices.append({
             "serial": serial,
             "state": state,  # "device" (ready), "unauthorized" (tap Allow on the phone), "offline"
             "model": props.get("model", "").replace("_", " ") or None,
         })
     return devices
+
+
+# USB vendor IDs of common Android phone makers (Samsung, Google, Motorola,
+# Xiaomi, Huawei, OnePlus, Oppo/Realme, Vivo, HTC, LG, Sony, Transsion).
+_ANDROID_VENDOR_IDS = {"04E8", "18D1", "22B8", "2717", "12D1", "2A70", "22D9", "2D95", "0BB4", "1004", "0FCE", "2A45"}
+_APPLE_VENDOR_ID = "05AC"
+_attached_cache: dict = {"at": 0.0, "value": None}
+
+
+def _scan_usb() -> dict:
+    """Phones plugged in by cable, as Windows sees them: {"android": ..., "iphone": ...}.
+
+    adb only sees Android phones with USB debugging on, but Windows enumerates a
+    phone in any mode — so we can tell the user *why* it isn't installing (e.g.
+    left on MIDI) and spot iPhones, which install through Sideloadly instead.
+    """
+    if sys.platform != "win32":
+        return {"android": None, "iphone": None}
+    if time.time() - _attached_cache["at"] < 4:
+        return _attached_cache["value"]
+
+    script = (
+        "Get-CimInstance Win32_PnPEntity -Filter \"PNPDeviceID LIKE 'USB%VID_%'\" | "
+        "ForEach-Object { $_.PNPDeviceID + '|' + $_.Name }"
+    )
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-NonInteractive", "-Command", script],
+            capture_output=True, text=True, timeout=8, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        return {"android": None, "iphone": None}
+
+    phone = None
+    iphone = None
+    for line in result.stdout.splitlines():
+        device_id, _, name = line.strip().partition("|")
+        upper = device_id.upper()
+        lower_name = name.strip().lower()
+        vendor = upper.split("VID_", 1)[1][:4] if "VID_" in upper else ""
+
+        if vendor == _APPLE_VENDOR_ID:
+            # Apple's iPhone/iPad USB product IDs are 0x12xx.
+            if "iphone" in lower_name or "ipad" in lower_name or "apple mobile device" in lower_name or "PID_12" in upper:
+                iphone = iphone or {"name": None, "driver_ok": False}
+                if "iphone" in lower_name or "ipad" in lower_name:
+                    iphone["name"] = name.strip()
+                if "apple mobile device" in lower_name:
+                    iphone["driver_ok"] = True
+            continue
+
+        if vendor not in _ANDROID_VENDOR_IDS:
+            continue
+        phone = phone or {"name": None, "mode": "charging", "adb_interface": False}
+        if "MIDI" in upper or lower_name == "midi function":
+            phone["mode"] = "midi"
+        elif ("MTP" in upper or "WPD" in name.upper()) and phone["mode"] != "midi":
+            phone["mode"] = "file-transfer"
+        if "adb" in lower_name:
+            phone["adb_interface"] = True
+        if "\\" in device_id and "&MI_" not in upper and "composite" not in lower_name and "midi" not in lower_name:
+            phone["name"] = phone["name"] or name.strip() or None
+
+    value = {"android": phone, "iphone": iphone}
+    _attached_cache.update(at=time.time(), value=value)
+    return value
 
 
 @install.get("/api/install/usb")
@@ -226,7 +311,16 @@ def usb_status():
         devices = _list_devices(adb)
     except (subprocess.TimeoutExpired, OSError) as exc:
         return jsonify({"supported": False, "reason": "adb-error", "detail": str(exc)})
-    return jsonify({"supported": True, "devices": devices, "apk_available": _apk_path().exists()})
+    scan = _scan_usb()
+    return jsonify({
+        "supported": True,
+        "devices": devices,
+        # Only worth the slower Windows lookup when adb sees nothing usable.
+        "attached": None if devices else scan["android"],
+        "iphone": scan["iphone"],
+        "apk_available": _apk_path().exists(),
+        "ipa_available": _ipa_path().exists(),
+    })
 
 
 @install.post("/api/install/usb/install")

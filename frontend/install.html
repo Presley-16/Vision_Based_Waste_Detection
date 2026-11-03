@@ -57,6 +57,10 @@
 
       <div class="qr-box" id="qrBox" aria-label="QR code to install PlanetWatch"></div>
       <a class="install-link" id="qrLink" href="#"></a>
+      <p class="install-note" id="httpsNote" hidden style="margin: -8px 0 20px; text-align: center;">
+        iPhones only share location over <strong>https</strong>. For iPhone users, start the server with
+        <code>python backend/run.py --tunnel</code> and scan the new code.
+      </p>
 
       <ol class="install-steps">
         <li><span>Open the <strong>camera</strong> on your phone and point it at the QR code, then tap the link that appears.</span></li>
@@ -84,13 +88,19 @@
         </div>
         <div>
           <h2>Install with a USB cable</h2>
-          <p>Android phones &middot; connect to this computer</p>
+          <p>Android &amp; iPhone &middot; connect to this computer</p>
         </div>
       </div>
 
+      <div class="platform-tabs" role="tablist" aria-label="Phone type">
+        <button type="button" class="platform-tab is-active" data-platform-tab="android" role="tab" aria-selected="true">Android</button>
+        <button type="button" class="platform-tab" data-platform-tab="ios" role="tab" aria-selected="false">iPhone</button>
+      </div>
+
+      <div class="platform-panel" data-platform-panel="android">
       <ol class="install-steps">
-        <li><span>On your phone open <strong>Settings &rarr; About phone</strong> and tap <strong>Build number</strong> 7 times to unlock Developer options.</span></li>
-        <li><span>Go to <strong>Settings &rarr; System &rarr; Developer options</strong> and switch on <strong>USB debugging</strong>.</span></li>
+        <li><span>On your phone open <strong>Settings &rarr; About phone</strong> (Samsung: <strong>About phone &rarr; Software information</strong>) and tap <strong>Build number</strong> 7 times to unlock Developer options.</span></li>
+        <li><span>Open <strong>Settings &rarr; Developer options</strong> (other phones: <strong>Settings &rarr; System &rarr; Developer options</strong>) and switch on <strong>USB debugging</strong>.</span></li>
         <li><span>Connect your phone to this computer with a <strong>USB cable</strong>.</span></li>
         <li><span>Scroll down from the top of your phone's screen, tap the <strong>&ldquo;Charging this device via USB&rdquo;</strong> notification and select <strong>File transfer</strong>.</span></li>
         <li><span>Tap <strong>Allow</strong> when your phone asks &ldquo;Allow USB debugging?&rdquo;.</span></li>
@@ -101,7 +111,23 @@
         <span class="dot"></span> Checking for a connected phone&hellip;
       </span>
       <button type="button" class="btn btn-primary btn-block" id="usbInstallBtn" disabled>Install app</button>
-      <p class="install-note">iPhone? Use the QR code &mdash; Apple doesn't allow installing apps over a cable without Xcode.</p>
+      </div>
+
+      <div class="platform-panel" data-platform-panel="ios" hidden>
+      <ol class="install-steps">
+        <li><span>Install <strong>iTunes</strong> (for the iPhone USB driver) and <a href="https://sideloadly.io" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">Sideloadly</a> on this computer.</span></li>
+        <li><span>Connect your iPhone with a <strong>USB cable</strong>, unlock it and tap <strong>Trust</strong> on &ldquo;Trust This Computer?&rdquo;.</span></li>
+        <li><span>When the <strong>green check</strong> appears, click <strong>Download PlanetWatch.ipa</strong>.</span></li>
+        <li><span>Open Sideloadly, drag in <strong>PlanetWatch.ipa</strong>, enter your <strong>Apple ID</strong> and click <strong>Start</strong>.</span></li>
+        <li><span>On the iPhone open <strong>Settings &rarr; General &rarr; VPN &amp; Device Management</strong>, tap your Apple ID and <strong>Trust</strong> it. On iOS 16+ also turn on <strong>Settings &rarr; Privacy &amp; Security &rarr; Developer Mode</strong>.</span></li>
+      </ol>
+
+      <span class="location-pill install-status waiting" id="iosStatus">
+        <span class="dot"></span> Checking for a connected iPhone&hellip;
+      </span>
+      <a class="btn btn-primary btn-block is-disabled" id="ipaDownloadBtn">Download PlanetWatch.ipa</a>
+      <p class="install-note">A free Apple ID keeps the app working for 7 days, after which Sideloadly re-installs it. No cable? Use the QR code to add PlanetWatch to the Home Screen.</p>
+      </div>
     </div>
   </div>
 </div>

@@ -10,7 +10,7 @@
   }
 
   async function request(path, options = {}) {
-    const headers = {};
+    const headers = { 'ngrok-skip-browser-warning': '1' };
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) headers.Authorization = 'Bearer ' + token;
     let body;

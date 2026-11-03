@@ -38,6 +38,8 @@
 
   async function request(path, options = {}) {
     const headers = Object.assign({}, options.headers);
+    // ngrok (`run.py --tunnel`) shows a browser warning page unless asked not to.
+    headers['ngrok-skip-browser-warning'] = '1';
     const token = getToken();
     if (token) headers.Authorization = 'Bearer ' + token;
 

@@ -51,6 +51,13 @@
         <li><span>Scroll down and tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</span></li>
         <li><span>Open PlanetWatch from your Home Screen and allow <strong>Location</strong>.</span></li>
       </ol>
+      <div class="alert alert-error" id="iosHttpWarning" hidden style="margin-bottom: 16px;">
+        <img src="img/icons/warning.png" alt="">
+        <div>
+          <strong>Location won't work on this address</strong>
+          <p>iPhones only share location over a secure (https) link. Ask the PlanetWatch team for the https QR code.</p>
+        </div>
+      </div>
       <a class="btn btn-primary btn-block" href="index.html">Continue to PlanetWatch</a>
     </div>
 
@@ -68,6 +75,9 @@
       const isIos = /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const platform = /android/.test(ua) ? 'android' : isIos ? 'ios' : 'other';
       document.querySelector('[data-platform="' + platform + '"]').hidden = false;
+      if (platform === 'ios' && !window.isSecureContext) {
+        document.getElementById('iosHttpWarning').hidden = false;
+      }
 
       const session = new URLSearchParams(location.search).get('s');
       if (session) {

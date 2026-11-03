@@ -40,10 +40,13 @@ asks them to switch it on. The Report page pins the current location on a map an
 every photo with it.
 
 Browsers only share location on **https** or `localhost`. Phones visiting the website over
-plain `http://192.168.x.x` won't get a location. Serve the backend over HTTPS (for
-example a tunnel such as `cloudflared tunnel --url http://localhost:5000`) and set
-`PUBLIC_BASE_URL` to that address. The Android app is not affected, because its pages
-load from the app itself.
+plain `http://192.168.x.x` won't get a location, and on iPhone this always applies. Run
+`python backend/run.py --tunnel` to serve over https through ngrok. The QR code and share
+links switch to the https address automatically. The installed Android and iOS apps are
+not affected, because their pages load from the app itself.
+
+iPhone install options (native app via Sideloadly, or the Home Screen app) are covered in
+[mobile/README.md](mobile/README.md#ios).
 
 ## GPU
 
