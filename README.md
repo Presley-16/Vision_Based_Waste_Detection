@@ -45,8 +45,7 @@ plain `http://192.168.x.x` won't get a location, and on iPhone this always appli
 links switch to the https address automatically. The installed Android and iOS apps are
 not affected, because their pages load from the app itself.
 
-iPhone install options (native app via Sideloadly, or the Home Screen app) are covered in
-[mobile/README.md](mobile/README.md#ios).
+To install the app on an iPhone, see [mobile/INSTALL-iOS.md](mobile/INSTALL-iOS.md).
 
 ## GPU
 

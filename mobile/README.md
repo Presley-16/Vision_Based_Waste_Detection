@@ -40,6 +40,8 @@ From the website's **Install App** page:
 
 ## iOS
 
+> **Step-by-step guide:** [INSTALL-iOS.md](INSTALL-iOS.md) covers building, installing, renewing, and replacing the app on an iPhone.
+
 Apple doesn't allow installing an app file directly the way Android does. There are two
 ways to get PlanetWatch onto an iPhone, and **neither needs a Mac**.
 
