@@ -1,0 +1,17 @@
+[Unit]
+Description=PlanetWatch (Flask API, websites and YOLO waste check)
+After=network.target
+
+[Service]
+User=planetwatch
+Group=planetwatch
+WorkingDirectory=/opt/planetwatch
+# One process so the YOLO model is loaded once and install-page sessions stay in
+# one place; threads let it keep serving pages while a photo is being checked.
+# Settings come from /opt/planetwatch/.env (loaded by the app itself).
+ExecStart=/opt/planetwatch/venv/bin/gunicorn --chdir backend --workers 1 --threads 4 --timeout 300 --bind 127.0.0.1:8000 run:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

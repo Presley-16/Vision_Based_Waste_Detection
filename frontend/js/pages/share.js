@@ -2,7 +2,7 @@
   const PW = window.PW;
   const linkInput = document.getElementById('shareLink');
   const toast = document.getElementById('toast');
-  const message = 'Help keep our community clean — report illegal dumping with PlanetWatch: ';
+  const message = 'Help keep our community clean — report illegal waste dumping with PlanetWatch: ';
   let shareUrl = '';
 
   function showToast(text) {

@@ -5,6 +5,7 @@ Kept provider-agnostic about the weights file: pass the trained
 so the rest of the pipeline (backend API, detect.py) can be built and tested
 before the Zimbabwe-specific dataset is ready.
 """
+import threading
 from pathlib import Path
 
 from ultralytics import YOLO
@@ -12,6 +13,9 @@ from ultralytics import YOLO
 WEIGHTS_DIR = Path(__file__).resolve().parent / "weights"
 
 _model_cache: dict[str, YOLO] = {}
+# The server answers requests on several threads that share one model, and
+# YOLO models aren't thread-safe, so loading and predicting go one at a time.
+_lock = threading.Lock()
 
 
 def resolve_weights(weights_path: str) -> Path:
@@ -31,15 +35,16 @@ def resolve_weights(weights_path: str) -> Path:
 def load_model(weights_path: str) -> YOLO:
     """Load (and cache) a YOLO model from `weights_path`."""
     weights_path = str(resolve_weights(weights_path))
-    if weights_path not in _model_cache:
-        if not Path(weights_path).exists():
-            raise FileNotFoundError(
-                f"Weights file not found: {weights_path}. "
-                "Train a model with model/train.py, or point YOLO_WEIGHTS "
-                "at a stock checkpoint such as yolo11n.pt in the meantime."
-            )
-        _model_cache[weights_path] = YOLO(weights_path)
-    return _model_cache[weights_path]
+    with _lock:
+        if weights_path not in _model_cache:
+            if not Path(weights_path).exists():
+                raise FileNotFoundError(
+                    f"Weights file not found: {weights_path}. "
+                    "Train a model with model/train.py, or point YOLO_WEIGHTS "
+                    "at a stock checkpoint such as yolo11n.pt in the meantime."
+                )
+            _model_cache[weights_path] = YOLO(weights_path)
+        return _model_cache[weights_path]
 
 
 def run_inference(model: YOLO, image_path: str, conf: float = 0.25) -> list[dict]:
@@ -47,7 +52,8 @@ def run_inference(model: YOLO, image_path: str, conf: float = 0.25) -> list[dict
 
     Each dict has: class_name, confidence, bbox ([x1, y1, x2, y2] in pixels).
     """
-    results = model.predict(source=image_path, conf=conf, verbose=False)
+    with _lock:
+        results = model.predict(source=image_path, conf=conf, verbose=False)
     detections = []
     for result in results:
         for box in result.boxes:
@@ -62,7 +68,8 @@ def run_inference(model: YOLO, image_path: str, conf: float = 0.25) -> list[dict
 
 def save_annotated_image(model: YOLO, image_path: str, output_path: str, conf: float = 0.25) -> str:
     """Run detection and save an annotated copy of the image with boxes drawn."""
-    results = model.predict(source=image_path, conf=conf, verbose=False)
+    with _lock:
+        results = model.predict(source=image_path, conf=conf, verbose=False)
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     results[0].save(filename=str(output_path))

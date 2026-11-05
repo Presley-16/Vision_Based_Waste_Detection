@@ -17,9 +17,28 @@
 
 <div class="container">
   <div class="section" style="padding-top: 40px;">
-    <div class="form-card" style="max-width: 440px; margin: 0 auto;">
-      <h2>Your Profile</h2>
-      <p class="form-sub">These details are used to auto-fill your reports &mdash; update them any time.</p>
+    <div class="form-card profile-card">
+      <div class="profile-head">
+        <button type="button" class="avatar" id="avatarBtn" aria-label="Add a profile photo">
+          <img id="avatarImg" alt="" hidden>
+          <span class="avatar-initials" id="avatarInitials"></span>
+          <span class="avatar-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 8.5A2 2 0 0 1 6 6.5h1.6l1.4-2h6l1.4 2H18a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12.5" r="3.2" stroke="currentColor" stroke-width="1.8"/></svg>
+          </span>
+        </button>
+        <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" hidden>
+        <div class="profile-id">
+          <h2 id="profileName">Your Profile</h2>
+          <p id="memberSince"></p>
+          <button type="button" class="avatar-remove" id="removePhotoBtn" hidden>Remove photo</button>
+        </div>
+        <button type="button" class="btn btn-ghost btn-edit" id="editBtn">
+          <svg class="icon-edit" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M13.5 6.5l4 4" stroke="currentColor" stroke-width="1.8"/></svg>
+          <svg class="icon-cancel" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+          <span>Edit profile</span>
+        </button>
+      </div>
+      <p class="form-sub profile-sub">These details are used to auto-fill your reports.</p>
 
       <div class="alert alert-success" id="savedBox" hidden>
         <img src="img/icons/success.png" alt="">
@@ -33,65 +52,44 @@
         </div>
       </div>
 
-      <form id="profileForm">
+      <form id="profileForm" class="profile-form is-readonly">
         <div class="field">
           <label for="name">First name</label>
-          <input type="text" id="name" name="name" required>
+          <input type="text" id="name" name="name" required readonly autocomplete="given-name">
         </div>
         <div class="field">
           <label for="surname">Surname</label>
-          <input type="text" id="surname" name="surname" required>
+          <input type="text" id="surname" name="surname" required readonly autocomplete="family-name">
         </div>
         <div class="field">
           <label for="address">Address</label>
-          <input type="text" id="address" name="address">
+          <input type="text" id="address" name="address" readonly autocomplete="street-address">
         </div>
         <div class="field">
           <label for="phone">Phone number</label>
-          <input type="text" id="phone" name="phone" required inputmode="tel">
+          <input type="text" id="phone" name="phone" required readonly inputmode="tel" autocomplete="tel">
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+
+        <!-- Only shown once something has actually been changed. -->
+        <div class="profile-confirm" id="confirmBlock" hidden>
+          <div class="field">
+            <label for="currentPassword" id="passwordLabel">Current password</label>
+            <div class="password-input">
+              <input type="password" id="currentPassword" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+              <button type="button" class="password-toggle" data-password-toggle aria-label="Show password"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/></svg></button>
+            </div>
+            <span class="field-hint" id="passwordHint">Enter your password to confirm these changes.</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+        </div>
       </form>
 
-      <button type="button" class="btn btn-ghost btn-block" style="margin-top: 14px;" id="logoutBtn">Log Out</button>
+      <button type="button" class="btn btn-ghost btn-block profile-logout" id="logoutBtn">Log Out</button>
     </div>
   </div>
 </div>
 
   <script src="js/location-guard.js"></script>
-  <script>
-    (function () {
-      const form = document.getElementById('profileForm');
-      const savedBox = document.getElementById('savedBox');
-      const errorBox = document.getElementById('errorBox');
-      const submit = form.querySelector('button[type="submit"]');
-
-      PW.ready.then((citizen) => {
-        if (!citizen) return;
-        ['name', 'surname', 'address', 'phone'].forEach((key) => { form.elements[key].value = citizen[key] || ''; });
-      });
-
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        savedBox.hidden = true;
-        errorBox.hidden = true;
-        submit.disabled = true;
-        submit.classList.add('is-loading');
-        try {
-          const data = await PW.request('/api/me', { method: 'PUT', body: Object.fromEntries(new FormData(form)) });
-          PW.setCitizen(data.citizen);
-          savedBox.hidden = false;
-        } catch (error) {
-          errorBox.querySelector('[data-error-text]').textContent = error.message;
-          errorBox.hidden = false;
-        } finally {
-          submit.disabled = false;
-          submit.classList.remove('is-loading');
-        }
-      });
-
-      document.getElementById('logoutBtn').addEventListener('click', () => PW.logout());
-    })();
-  </script>
+  <script src="js/pages/profile.js"></script>
 </body>
 </html>

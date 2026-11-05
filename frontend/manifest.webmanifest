@@ -1,7 +1,7 @@
 {
   "name": "PlanetWatch",
   "short_name": "PlanetWatch",
-  "description": "Report illegal dumping — pinned to your location and classified by AI.",
+  "description": "Report illegal waste dumping — pinned to your location and classified by AI.",
   "start_url": "index.html",
   "scope": "./",
   "display": "standalone",

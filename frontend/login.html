@@ -40,7 +40,7 @@
 
       <div class="auth-form-card">
         <h3>Sign In to PlanetWatch</h3>
-        <p class="form-sub">Enter your first name and surname to continue.</p>
+        <p class="form-sub">Enter your first name, surname and password to continue.</p>
 
         <div class="alert alert-error" data-error hidden>
           <img src="img/icons/warning.png" alt="">
@@ -58,6 +58,13 @@
           <div class="field">
             <label for="signin-surname">Surname</label>
             <input type="text" id="signin-surname" name="surname" placeholder="Moyo" required autocomplete="family-name">
+          </div>
+          <div class="field">
+            <label for="signin-password">Password</label>
+            <div class="password-input">
+              <input type="password" id="signin-password" name="password" required autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+              <button type="button" class="password-toggle" data-password-toggle aria-label="Show password"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/></svg></button>
+            </div>
           </div>
 
           <button type="submit" class="btn btn-primary btn-block">Sign In</button>
@@ -130,6 +137,21 @@
           <div class="field">
             <label for="phone">Phone number</label>
             <input type="text" id="phone" name="phone" placeholder="+263 77 123 4567" required autocomplete="tel" inputmode="tel">
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="password-input">
+              <input type="password" id="password" name="password" required autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" minlength="6" aria-describedby="password-hint">
+              <button type="button" class="password-toggle" data-password-toggle aria-label="Show password"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/></svg></button>
+            </div>
+            <span class="field-hint" id="password-hint">At least 6 characters. Spaces and any symbols are allowed.</span>
+          </div>
+          <div class="field">
+            <label for="confirm-password">Confirm password</label>
+            <div class="password-input">
+              <input type="password" id="confirm-password" name="confirm_password" required autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" minlength="6">
+              <button type="button" class="password-toggle" data-password-toggle aria-label="Show password"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/></svg></button>
+            </div>
           </div>
           <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
         </form>

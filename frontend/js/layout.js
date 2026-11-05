@@ -92,11 +92,22 @@
     body.insertAdjacentHTML('beforeend',
       '<footer class="site-footer">' +
         '<div class="container">' +
-          '<span>&copy; 2026 PlanetWatch &mdash; Vision-based illegal dumping detection</span>' +
+          '<span>&copy; 2026 PlanetWatch &mdash; Vision-based illegal waste dumping detection</span>' +
           '<span>Powered by YOLOv11</span>' +
         '</div>' +
       '</footer>'
     );
+  });
+
+  // Eye button beside a password field: show / hide what was typed.
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-password-toggle]');
+    if (!button) return;
+    const input = button.parentElement.querySelector('input');
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    button.classList.toggle('is-showing', show);
+    button.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
   });
 
   window.addEventListener('load', () => {

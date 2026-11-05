@@ -58,7 +58,7 @@
         myReportsEl.innerHTML =
           '<div class="login-prompt-card">' +
             "<p>You haven't submitted any reports yet.</p>" +
-            '<a class="btn btn-primary" href="report.html">Report Illegal Dumping</a>' +
+            '<a class="btn btn-primary" href="report.html">Report Illegal Waste Dumping</a>' +
           '</div>';
         return;
       }

@@ -9,8 +9,8 @@ For convenience it also serves `frontend/` at `/` and `municipal/` at `/municipa
 
 | Method | Path | Who |
 | --- | --- | --- |
-| POST | `/api/auth/signup`, `/api/auth/signin` | citizen → `{token, citizen}` |
-| GET/PUT | `/api/me` | citizen profile |
+| POST | `/api/auth/signup` (name, surname, phone, password, address), `/api/auth/signin` (name, surname, password) | citizen → `{token, citizen}` |
+| GET/PUT | `/api/me` | citizen profile. PUT needs `current_password`; it is JSON or multipart with an optional `photo` / `remove_photo` |
 | GET | `/api/me/reports` | citizen's own reports |
 | GET | `/api/reports` | public GeoJSON of all pinned reports |
 | POST | `/api/reports` | multipart: `photos` (one or more) with a `latitude`/`longitude` pair per photo; location is required |
@@ -20,6 +20,9 @@ For convenience it also serves `frontend/` at `/` and `municipal/` at `/municipa
 | GET | `/api/install/info`, `/api/install/status` | QR code and scan detection for the install page |
 | GET | `/download/PlanetWatch.apk` | serves `mobile/dist/PlanetWatch.apk` |
 | GET/POST | `/api/install/usb`, `/api/install/usb/install` | ADB install. Only answers requests from this computer. |
+
+Passwords are stored only as salted scrypt hashes. They can contain spaces and any symbols, and need at least 6 characters.
+Accounts created before passwords existed set one by signing up again with the same name.
 
 Auth uses `Authorization: Bearer <token>`. Tokens are signed with `FLASK_SECRET_KEY`. If that
 isn't set, a random key is used, so restarting the server signs everyone out.
@@ -35,3 +38,4 @@ isn't set, a random key is used, so restarting the server signs everyone out.
 | `ADB_PATH` | auto: PATH, `ANDROID_HOME`, or the Android Studio SDK |
 | `YOLO_WEIGHTS`, `YOLO_CONF_THRESHOLD` | `model/weights/best.pt`, `0.25` |
 | `FLASK_HOST` / `FLASK_PORT` / `FLASK_DEBUG` | `0.0.0.0` / `5000` / `1` |
+| `TRUSTED_PROXY` | unset. Set it to `1` behind nginx so the app trusts `X-Forwarded-*` (see `deploy/README.md`) |

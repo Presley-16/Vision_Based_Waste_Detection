@@ -103,7 +103,8 @@
     updateSubmit();
   }
 
-  function addFiles(fileList) {
+  // `takenAt` is only known for camera shots; uploads keep the time in their own EXIF.
+  function addFiles(fileList, takenAt) {
     const fix = PW.location.current;
     if (!fix) {
       showError('Waiting for your location — photos can only be added once your position is pinned.');
@@ -111,17 +112,38 @@
     }
     hideMessages();
     Array.from(fileList).filter((file) => file.type.startsWith('image/') || /\.(jpe?g|png|heic)$/i.test(file.name)).forEach((file) => {
-      photos.push({ file, url: URL.createObjectURL(file), lat: fix.lat, lng: fix.lng });
+      photos.push({ file, url: URL.createObjectURL(file), lat: fix.lat, lng: fix.lng, takenAt: takenAt || null });
     });
     renderPhotos();
   }
 
-  ['photo', 'cameraInput'].forEach((id) => {
-    const input = document.getElementById(id);
-    input.addEventListener('change', () => {
-      addFiles(input.files);
-      input.value = '';
-    });
+  const photoInput = document.getElementById('photo');
+  photoInput.addEventListener('change', () => {
+    addFiles(photoInput.files);
+    photoInput.value = '';
+  });
+
+  // Native camera fallback (phones on plain http, where a live camera isn't allowed).
+  const cameraInput = document.getElementById('cameraInput');
+  cameraInput.addEventListener('change', () => {
+    addFiles(cameraInput.files, new Date());
+    cameraInput.value = '';
+  });
+
+  document.getElementById('cameraBtn').addEventListener('click', async () => {
+    if (!PW.location.current) {
+      showError('Waiting for your location — photos can only be taken once your position is pinned.');
+      return;
+    }
+    if (!PW.camera.supported()) {
+      cameraInput.click();
+      return;
+    }
+    const shot = await PW.camera.open();
+    if (!shot) return;
+    hideMessages();
+    photos.push({ file: shot.file, url: URL.createObjectURL(shot.file), lat: shot.fix.lat, lng: shot.fix.lng, takenAt: shot.takenAt });
+    renderPhotos();
   });
 
   ['dragenter', 'dragover'].forEach((evt) => {
@@ -197,6 +219,50 @@
     }, 4000);
   }
 
+  // Shown when the model finds no waste: the photo isn't submitted. Stays until closed.
+  function showRejectPopup(rejectedCount, submittedCount) {
+    const title = submittedCount
+      ? rejectedCount + (rejectedCount === 1 ? ' photo was' : ' photos were') + ' not submitted'
+      : (rejectedCount === 1 ? 'Photo not submitted' : 'Photos not submitted');
+    const text = submittedCount
+      ? 'No waste was detected in ' + (rejectedCount === 1 ? 'it' : 'them') + '. The other ' +
+        (submittedCount === 1 ? 'photo was' : submittedCount + ' photos were') + ' submitted.'
+      : 'No waste, litter or garbage was detected. Take a clearer photo that shows the dumped waste and try again.';
+    const popup = document.createElement('div');
+    popup.className = 'ripple-popup-overlay reject-popup';
+    popup.setAttribute('role', 'alertdialog');
+    popup.innerHTML =
+      '<div class="ripple-rings"><span></span><span></span><span></span></div>' +
+      '<div class="ripple-popup-card">' +
+        '<button type="button" class="popup-close" aria-label="Close">&times;</button>' +
+        '<img class="popup-reject-img" src="img/icons/decline.png" alt="">' +
+        '<p>' + title + '</p>' +
+        '<span class="popup-reject-text">' + text + '</span>' +
+      '</div>';
+    document.body.appendChild(popup);
+
+    function close() {
+      document.removeEventListener('keydown', onKey);
+      popup.classList.add('is-settling');
+      setTimeout(() => popup.remove(), 700);
+    }
+    function onKey(event) {
+      if (event.key === 'Escape') close();
+    }
+    document.addEventListener('keydown', onKey);
+    popup.querySelector('.popup-close').addEventListener('click', close);
+    popup.addEventListener('click', (event) => {
+      if (event.target === popup) close();
+    });
+    popup.querySelector('.popup-close').focus();
+  }
+
+  function clearPhotos() {
+    photos.forEach((photo) => URL.revokeObjectURL(photo.url));
+    photos = [];
+    renderPhotos();
+  }
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!photos.length || !PW.location.current) return;
@@ -206,6 +272,7 @@
       body.append('photos', photo.file, photo.file.name);
       body.append('latitude', photo.lat);
       body.append('longitude', photo.lng);
+      body.append('captured_at', photo.takenAt ? PW.camera.exifDate(photo.takenAt) : '');
     });
     body.append('contact', contactInput.value);
 
@@ -218,14 +285,19 @@
     try {
       const data = await PW.request('/api/reports', { method: 'POST', body });
       data.reports.forEach((report) => addReportPin(report));
-      photos.forEach((photo) => URL.revokeObjectURL(photo.url));
-      photos = [];
-      renderPhotos();
+      clearPhotos();
       showSuccess(data.reports);
-      showRipplePopup();
+      const rejected = (data.rejected || []).length;
+      if (rejected) showRejectPopup(rejected, data.reports.length);
+      else showRipplePopup();
     } catch (error) {
       if (error.status === 401) {
         PW.redirectToLogin();
+        return;
+      }
+      if (error.status === 422 && error.data && error.data.rejected) {
+        clearPhotos();
+        showRejectPopup(error.data.rejected.length, 0);
         return;
       }
       showError(error.message);

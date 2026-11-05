@@ -1,4 +1,4 @@
-"""Email/SMS alert logic for confirmed illegal dumping detections.
+"""Email/SMS alert logic for confirmed illegal waste dumping detections.
 
 Email uses Gmail SMTP; SMS uses Twilio. Both read credentials from
 environment variables (.env) and are no-ops with a printed warning if those
@@ -49,7 +49,7 @@ def send_sms_alert(message: str, to_number: str) -> bool:
 def notify_new_report(report, detections: list[dict]) -> None:
     """Fan out an alert to every configured recipient for a new report."""
     waste_types = ", ".join(sorted({d["class_name"] for d in detections})) or "unclassified waste"
-    subject = f"New illegal dumping report — {waste_types}"
+    subject = f"New illegal waste dumping report — {waste_types}"
     body = (
         f"Report #{report.id} submitted at {report.submitted_at.isoformat()}\n"
         f"Location: {report.latitude}, {report.longitude}\n"

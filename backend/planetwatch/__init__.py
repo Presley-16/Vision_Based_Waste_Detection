@@ -6,6 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from sqlalchemy import inspect, text
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .models import db
 
@@ -18,6 +19,11 @@ load_dotenv(REPO_ROOT / ".env")
 
 def create_app() -> Flask:
     app = Flask(__name__, instance_path=str(BACKEND_DIR / "instance"), static_folder=None)
+    if os.environ.get("TRUSTED_PROXY") == "1":
+        # Behind nginx (deploy/): take the client IP and https scheme from its
+        # X-Forwarded-* headers. Without this every request looks local, which
+        # would open the this-computer-only USB install endpoints to everyone.
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
     # A fresh random key each process start invalidates every previously-issued
     # token, so restarting the server always forces a new sign-in — set
     # FLASK_SECRET_KEY explicitly to opt back into surviving restarts.
@@ -43,6 +49,11 @@ def create_app() -> Flask:
         if "citizen_id" not in report_columns:
             with db.engine.begin() as conn:
                 conn.execute(text("ALTER TABLE reports ADD COLUMN citizen_id INTEGER REFERENCES citizens(id)"))
+        citizen_columns = {col["name"] for col in inspector.get_columns("citizens")}
+        for column, ddl in (("password_hash", "VARCHAR(255)"), ("photo_path", "VARCHAR(255)")):
+            if column not in citizen_columns:
+                with db.engine.begin() as conn:
+                    conn.execute(text(f"ALTER TABLE citizens ADD COLUMN {column} {ddl}"))
 
     _enable_cors(app)
 

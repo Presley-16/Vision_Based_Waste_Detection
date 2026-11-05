@@ -19,7 +19,7 @@
 <div class="container">
   <div class="report-banner slideshow">
     <div class="slide is-active">
-      <img src="img/hero-cleanup-crowd.jpg" alt="Cleanup crew clearing an illegal dumping site" onerror="this.closest('.slide').style.display='none';">
+      <img src="img/hero-cleanup-crowd.jpg" alt="Cleanup crew clearing an illegal waste dumping site" onerror="this.closest('.slide').style.display='none';">
     </div>
     <div class="slide">
       <img src="img/good-bye-waste.jpg" alt="Waste collection crew handling a pickup" onerror="this.closest('.slide').style.display='none';">
@@ -45,7 +45,7 @@
 
     <div class="report-banner-content">
       <span class="eyebrow"><span class="dot"></span> Community report</span>
-      <h1>Report Illegal Dumping</h1>
+      <h1>Report Illegal Waste Dumping</h1>
       <p>Take photos of the site — they're pinned to where you're standing, classified by our model, and routed to the cleanup map.</p>
     </div>
   </div>
@@ -145,14 +145,14 @@
             <input type="file" id="photo" accept="image/*" multiple>
           </div>
           <div class="capture-actions">
-            <label class="btn btn-ghost" for="cameraInput">
+            <button type="button" class="btn btn-ghost" id="cameraBtn">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M4 8a2 2 0 0 1 2-2h1.2l.8-1.4A2 2 0 0 1 9.7 3.6h4.6a2 2 0 0 1 1.7 1L17 6h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
                 <circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.6"/>
               </svg>
               Take photo
-            </label>
-            <input type="file" id="cameraInput" accept="image/*" capture="environment">
+            </button>
+            <input type="file" id="cameraInput" accept="image/jpeg,image/png,image/*" capture="environment">
           </div>
           <div class="photo-grid" id="photoGrid"></div>
         </div>
@@ -172,6 +172,7 @@
   <script src="js/slideshow.js" defer></script>
   <script src="js/location-guard.js"></script>
   <script src="js/map-pins.js"></script>
+  <script src="js/camera.js"></script>
   <script src="js/pages/report.js"></script>
 </body>
 </html>

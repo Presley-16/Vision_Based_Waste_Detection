@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import check_password_hash, generate_password_hash
 
 db = SQLAlchemy()
 
@@ -14,9 +15,23 @@ class Citizen(db.Model):
     surname = db.Column(db.String(80), nullable=False)
     address = db.Column(db.String(255), nullable=True)
     phone = db.Column(db.String(30), nullable=False)
+    # Salted scrypt hash, never the password itself. Empty for accounts made
+    # before passwords existed; signing up again with the same name sets one.
+    password_hash = db.Column(db.String(255), nullable=True)
+    photo_path = db.Column(db.String(255), nullable=True)  # optional profile photo in uploads/
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     reports = db.relationship("Report", backref="citizen")
+
+    @property
+    def has_password(self) -> bool:
+        return bool(self.password_hash)
+
+    def set_password(self, password: str) -> None:
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        return self.has_password and check_password_hash(self.password_hash, password)
 
     @property
     def full_name(self) -> str:
@@ -29,6 +44,9 @@ class Citizen(db.Model):
             "surname": self.surname,
             "address": self.address or "",
             "phone": self.phone,
+            "photo_url": f"/{self.photo_path}" if self.photo_path else None,
+            "has_password": self.has_password,
+            "member_since": self.created_at.isoformat() if self.created_at else None,
         }
 
 
