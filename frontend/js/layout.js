@@ -34,9 +34,9 @@
   }
 
   function navLinks() {
-    if (page === 'login') {
+    if (page === 'login' || page === 'forgot') {
       const params = new URLSearchParams(location.search);
-      const hint = params.get('mode') === 'signin'
+      const hint = page === 'login' && params.get('mode') === 'signin'
         ? ''
         : '<span class="nav-auth-hint">Already have an account? <a href="login.html?mode=signin&next=' +
           encodeURIComponent(params.get('next') || 'index.html') + '">Sign In</a></span>';

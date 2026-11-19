@@ -14,7 +14,8 @@ Output (all under model/datasets/, gitignored):
 
 Merge rules
   * every class becomes 0 `waste` (the downloaded sets use incompatible names such as
-    `garbage`, `garbage_bag`, `dumping`, `0`, `c` — all of them are dumped waste);
+    `garbage`, `garbage_bag`, `dumping`, `0`, `c` — all of them are dumped waste), except
+    sources with `waste_classes`, whose other classes (e.g. `Non-Garbage`) are dropped;
   * polygon labels are converted to boxes;
   * Roboflow exports several augmented copies of one photo — copies are grouped by their
     original filename so a photo never lands in both train and valid/test, and valid/test
@@ -59,10 +60,16 @@ DETECTION_SOURCES = [
      "exclude": r"^(batch|gopr|frame)"},
     {"slug": "garbage-roadside", "zip": "Garbage.v2i.yolov11.zip",
      "url": "https://universe.roboflow.com/agx-iyj2m/garbage-0q3db", "license": "CC BY 4.0"},
+    # Street dumps (class 0 `Garbage`) plus clean streets boxed as class 1 `Non-Garbage`,
+    # many of them red-dirt roads like ours. Only Garbage boxes are kept, so the clean
+    # streets become no-waste examples.
+    {"slug": "garbage-identification", "zip": "Garbage.v3i.yolov11.zip",
+     "url": "https://universe.roboflow.com/garbage-identification/garbage-8ugwq", "license": "CC BY 4.0",
+     "waste_classes": {0}},
 ]
 
 # Our own labelled photos (Roboflow export, already inside the project).
-OWN_SOURCE = {"slug": "planetwatch-own", "dir": "PlanetWatch Waste.v1i.yolov11",
+OWN_SOURCE = {"slug": "planetwatch-own", "dir": "PlanetWatch Waste.v3i.yolov11",
               "url": "https://universe.roboflow.com/presleys-workspace/planetwatch-waste", "license": "CC BY 4.0"}
 
 # Image-level (no boxes) datasets for the future waste-type classifier.
@@ -132,13 +139,18 @@ def image_hash(image_path: Path) -> str:
     return f"{int(bits, 2):016x}"
 
 
-def to_waste_boxes(label_path: Path) -> list[str]:
-    """Read a YOLO label file (boxes or polygons) and return `0 cx cy w h` lines."""
+def to_waste_boxes(label_path: Path, waste_classes: set[int] | None = None) -> list[str]:
+    """Read a YOLO label file (boxes or polygons) and return `0 cx cy w h` lines.
+
+    `waste_classes` limits which source classes count as waste (default: all of them).
+    """
     if not label_path.exists():
         return []
     lines = []
     for raw in label_path.read_text(encoding="utf-8", errors="ignore").splitlines():
         parts = raw.split()
+        if waste_classes is not None and parts and int(float(parts[0])) not in waste_classes:
+            continue
         if len(parts) == 5:
             cx, cy, w, h = map(float, parts[1:])
             x1, y1, x2, y2 = cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2
@@ -264,7 +276,7 @@ def build(downloads: Path, with_classification: bool, coco_negatives: int = 0) -
                 if split != "train" and not keep_own_split and index > 0:
                     continue  # one copy per photo outside train
                 name = f"{source['slug']}__{hashlib.sha1(str(image).encode()).hexdigest()[:10]}"
-                boxes = to_waste_boxes(label)
+                boxes = to_waste_boxes(label, source.get("waste_classes"))
                 shutil.copy2(image, output / split / "images" / f"{name}{image.suffix.lower()}")
                 (output / split / "labels" / f"{name}.txt").write_text("\n".join(boxes) + ("\n" if boxes else ""))
                 counts[split] += 1

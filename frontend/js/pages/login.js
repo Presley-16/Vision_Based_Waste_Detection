@@ -17,6 +17,13 @@
   const errorBox = container.querySelector('[data-error]');
   const submit = form.querySelector('button[type="submit"]');
 
+  // Carry the typed name over to the reset page.
+  const forgotLink = document.querySelector('[data-forgot-link]');
+  forgotLink.addEventListener('click', () => {
+    const query = new URLSearchParams({ name: form.elements.name.value.trim(), surname: form.elements.surname.value.trim(), next });
+    forgotLink.href = 'forgot-password.html?' + query;
+  });
+
   function showError(message) {
     errorBox.querySelector('[data-error-text]').textContent = message;
     errorBox.hidden = false;

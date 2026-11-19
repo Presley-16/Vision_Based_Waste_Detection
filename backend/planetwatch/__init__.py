@@ -49,6 +49,10 @@ def create_app() -> Flask:
         if "citizen_id" not in report_columns:
             with db.engine.begin() as conn:
                 conn.execute(text("ALTER TABLE reports ADD COLUMN citizen_id INTEGER REFERENCES citizens(id)"))
+        detection_columns = {col["name"] for col in inspector.get_columns("detections")}
+        if "type_confidence" not in detection_columns:
+            with db.engine.begin() as conn:
+                conn.execute(text("ALTER TABLE detections ADD COLUMN type_confidence FLOAT"))
         citizen_columns = {col["name"] for col in inspector.get_columns("citizens")}
         for column, ddl in (("password_hash", "VARCHAR(255)"), ("photo_path", "VARCHAR(255)")):
             if column not in citizen_columns:

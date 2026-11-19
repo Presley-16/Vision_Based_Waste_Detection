@@ -7,8 +7,14 @@
 (function () {
   const PW = window.PW;
   const listeners = new Set();
-  let watchId = null;
+  // Two watches run side by side: GPS ("precise") is accurate but often can't
+  // get a fix indoors; Wi-Fi/mobile-network positioning ("quick") answers in
+  // seconds almost anywhere. Whichever arrives first unlocks the app, and the
+  // sharper one wins after that.
+  const watches = {};
+  let timedOut = {};
   let gate = null;
+  const STALE_MS = 60000;
 
   const location_ = {
     current: null,
@@ -34,7 +40,7 @@
       return 'Location permission is blocked for PlanetWatch. Allow location access in your browser or phone settings, then tap “Turn on location”.';
     }
     if (error && error.code === 3) {
-      return "We couldn't get a location fix in time. Move somewhere with a clearer view of the sky and make sure Location is on.";
+      return "We couldn't find your location yet. Make sure Location is on and Wi-Fi is switched on (it helps your phone locate you indoors), then tap “Turn on location”.";
     }
     return 'Your device location is switched off. Swipe down from the top of your screen, turn on Location (GPS), then tap “Turn on location”.';
   }
@@ -95,35 +101,57 @@
   }
 
   function onPosition(position) {
-    location_.current = {
+    const fix = {
       lat: position.coords.latitude,
       lng: position.coords.longitude,
       accuracy: position.coords.accuracy,
       timestamp: position.timestamp,
     };
+    const current = location_.current;
+    // Keep a recent sharper fix rather than jumping to a rougher network one.
+    if (current && fix.accuracy > current.accuracy && fix.timestamp - current.timestamp < STALE_MS) return;
+    timedOut = {};
+    location_.current = fix;
     hideGate();
     listeners.forEach((fn) => fn(location_.current));
   }
 
-  function onError(error) {
-    // A slow fix after we already have one isn't worth interrupting for;
-    // anything else (switched off, permission revoked) blocks again.
-    if (error && error.code === 3 && location_.current) return;
+  function onError(kind, error) {
+    if (error && error.code === 3) {
+      // Slow, not off: ignore it while we have a fix or the other watch may still answer.
+      if (location_.current) return;
+      timedOut[kind] = true;
+      if (!(timedOut.precise && timedOut.quick)) return;
+    }
+    // Switched off, permission blocked, or neither watch could find us: block.
     location_.current = null;
     listeners.forEach((fn) => fn(null, error));
     showGate(error);
   }
 
+  function stop() {
+    Object.keys(watches).forEach((kind) => {
+      navigator.geolocation.clearWatch(watches[kind]);
+      delete watches[kind];
+    });
+  }
+
   function start() {
     if (!navigator.geolocation || !window.isSecureContext) {
-      onError(null);
+      onError('precise', null);
       return;
     }
-    if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-    watchId = navigator.geolocation.watchPosition(onPosition, onError, {
+    stop();
+    timedOut = {};
+    watches.precise = navigator.geolocation.watchPosition(onPosition, (error) => onError('precise', error), {
       enableHighAccuracy: true,
       maximumAge: 10000,
-      timeout: 20000,
+      timeout: 30000,
+    });
+    watches.quick = navigator.geolocation.watchPosition(onPosition, (error) => onError('quick', error), {
+      enableHighAccuracy: false,
+      maximumAge: 120000,
+      timeout: 30000,
     });
   }
 
@@ -131,7 +159,7 @@
   if (navigator.permissions && navigator.permissions.query) {
     navigator.permissions.query({ name: 'geolocation' }).then((status) => {
       status.addEventListener('change', () => {
-        if (status.state === 'denied') onError({ code: 1 });
+        if (status.state === 'denied') onError('precise', { code: 1 });
         else start();
       });
     }).catch(() => {});

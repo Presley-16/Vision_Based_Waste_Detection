@@ -47,10 +47,16 @@ def load_model(weights_path: str) -> YOLO:
         return _model_cache[weights_path]
 
 
-def run_inference(model: YOLO, image_path: str, conf: float = 0.25) -> list[dict]:
+def run_inference(model: YOLO, image_path: str, conf: float = 0.25,
+                  type_model: YOLO | None = None, type_conf: float = 0.40) -> list[dict]:
     """Run detection on a single image, return a list of detection dicts.
 
     Each dict has: class_name, confidence, bbox ([x1, y1, x2, y2] in pixels).
+
+    With `type_model` (the waste-type classifier), each box is cropped the same way the
+    training crops were and classified: class_name becomes the waste type, or
+    "unclassified" below `type_conf`, and type_confidence is added. Without it the
+    detector's own class (`waste`) is kept.
     """
     with _lock:
         results = model.predict(source=image_path, conf=conf, verbose=False)
@@ -63,7 +69,27 @@ def run_inference(model: YOLO, image_path: str, conf: float = 0.25) -> list[dict
                 "confidence": round(float(box.conf.item()), 4),
                 "bbox": [round(v, 1) for v in box.xyxy[0].tolist()],
             })
+    if type_model is not None and detections:
+        classify_types(type_model, image_path, detections, type_conf)
     return detections
+
+
+def classify_types(type_model: YOLO, image_path: str, detections: list[dict], type_conf: float) -> None:
+    """Fill in class_name / type_confidence for each detection from the waste-type classifier."""
+    from PIL import Image, ImageOps
+
+    from model.crop_detections import crop_box
+    from model.waste_types import UNCLASSIFIED
+
+    with Image.open(image_path) as im:
+        image = ImageOps.exif_transpose(im).convert("RGB")
+    crops = [crop_box(image, tuple(d["bbox"]), 0.10) for d in detections]
+    with _lock:
+        results = type_model.predict(source=crops, verbose=False)
+    for detection, result in zip(detections, results):
+        confidence = float(result.probs.top1conf)
+        detection["type_confidence"] = round(confidence, 4)
+        detection["class_name"] = result.names[result.probs.top1] if confidence >= type_conf else UNCLASSIFIED
 
 
 def save_annotated_image(model: YOLO, image_path: str, output_path: str, conf: float = 0.25) -> str:

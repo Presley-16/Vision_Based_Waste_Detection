@@ -4,6 +4,8 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from model.waste_types import type_label  # plain dict + function, no torch import
+
 db = SQLAlchemy()
 
 
@@ -67,7 +69,8 @@ class Report(db.Model):
 
     @property
     def waste_types(self) -> list[str]:
-        return sorted({d.waste_type for d in self.detections})
+        """Readable labels of the types in this report, e.g. ["Construction rubble", "Plastic"]."""
+        return sorted({type_label(d.waste_type) for d in self.detections})
 
     def to_dict(self, include_reporter: bool = False) -> dict:
         """Public report shape; `include_reporter` adds uploader contact details for municipal staff."""
@@ -81,7 +84,9 @@ class Report(db.Model):
             "status": self.status,
             "waste_types": self.waste_types,
             "detections": [
-                {"waste_type": d.waste_type, "confidence": d.confidence} for d in self.detections
+                {"waste_type": type_label(d.waste_type), "type": d.waste_type,
+                 "confidence": d.confidence, "type_confidence": d.type_confidence}
+                for d in self.detections
             ],
         }
         if include_reporter:
@@ -114,10 +119,30 @@ class Detection(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     report_id = db.Column(db.Integer, db.ForeignKey("reports.id"), nullable=False)
-    waste_type = db.Column(db.String(50), nullable=False)
-    confidence = db.Column(db.Float, nullable=False)
+    waste_type = db.Column(db.String(50), nullable=False)  # a model.waste_types name, or "waste" before the classifier
+    confidence = db.Column(db.Float, nullable=False)  # detector: how sure this is waste
+    type_confidence = db.Column(db.Float, nullable=True)  # classifier: how sure of waste_type (None before it existed)
     bbox_x1 = db.Column(db.Float, nullable=False)
     bbox_y1 = db.Column(db.Float, nullable=False)
     bbox_x2 = db.Column(db.Float, nullable=False)
     bbox_y2 = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
+class PasswordReset(db.Model):
+    """A one-time code texted to a citizen's phone to reset a forgotten password."""
+    __tablename__ = "password_resets"
+
+    id = db.Column(db.Integer, primary_key=True)
+    citizen_id = db.Column(db.Integer, db.ForeignKey("citizens.id", ondelete="CASCADE"), nullable=False, index=True)
+    code_hash = db.Column(db.String(255), nullable=False)  # hashed like a password
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    attempts = db.Column(db.Integer, default=0, nullable=False)
+
+    def check_code(self, code: str) -> bool:
+        return check_password_hash(self.code_hash, code)
+
+    @staticmethod
+    def hash_code(code: str) -> str:
+        return generate_password_hash(code)

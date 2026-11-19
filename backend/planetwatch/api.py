@@ -1,7 +1,8 @@
 """Citizen-facing JSON API used by both the website (frontend/) and the mobile app (mobile/)."""
 import os
+import secrets
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from flask import Blueprint, current_app, g, jsonify, request
@@ -9,9 +10,9 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 from model.exif_extract import IMAGE_EXTENSIONS, extract_gps_and_timestamp
 
-from .alerts import notify_new_report
+from .alerts import notify_new_report, send_sms_alert, sms_number
 from .auth import citizen_required, issue_citizen_token
-from .models import Citizen, Detection, Report, db
+from .models import Citizen, Detection, PasswordReset, Report, db
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
@@ -108,6 +109,95 @@ def signup():
 @citizen_required
 def me():
     return jsonify({"citizen": g.citizen.to_dict()})
+
+
+# ---------- Forgot password: a 6-digit code texted to the account's phone ----------
+
+RESET_CODE_MINUTES = 10
+RESET_MAX_ATTEMPTS = 5
+RESET_RESEND_SECONDS = 60
+RESET_MAX_PER_HOUR = 5
+
+
+def _masked_phone(phone: str) -> str:
+    digits = [c for c in phone if c.isdigit()]
+    return "\u2022\u2022\u2022\u2022 \u2022\u2022\u2022 " + "".join(digits[-3:]) if len(digits) >= 3 else "your phone"
+
+
+@api.post("/auth/forgot")
+def forgot_password():
+    data = _payload()
+    name = (data.get("name") or "").strip()
+    surname = (data.get("surname") or "").strip()
+    if not name or not surname:
+        return jsonify({"error": "Please enter your first name and surname."}), 400
+    citizen = _find_citizen(name, surname)
+    if not citizen:
+        return jsonify({"error": "We couldn't find an account with that name and surname."}), 404
+
+    now = datetime.utcnow()
+    recent = (PasswordReset.query.filter(PasswordReset.citizen_id == citizen.id,
+                                         PasswordReset.created_at > now - timedelta(hours=1))
+              .order_by(PasswordReset.created_at.desc()).all())
+    if len(recent) >= RESET_MAX_PER_HOUR:
+        return jsonify({"error": "Too many codes have been requested. Please try again in an hour."}), 429
+    if recent and (now - recent[0].created_at).total_seconds() < RESET_RESEND_SECONDS:
+        wait = RESET_RESEND_SECONDS - int((now - recent[0].created_at).total_seconds())
+        return jsonify({"error": f"Please wait {wait} seconds before asking for another code.", "retry_after": wait}), 429
+
+    code = f"{secrets.randbelow(10 ** 6):06d}"
+    message = (f"Your PlanetWatch password reset code is {code}. "
+               f"It expires in {RESET_CODE_MINUTES} minutes. Don't share it with anyone.")
+    try:
+        sent = send_sms_alert(message, sms_number(citizen.phone))
+    except Exception as exc:  # phone gateway unreachable, or the SMS service rejected the request
+        current_app.logger.error("Reset code SMS to citizen %s failed: %s", citizen.id, exc)
+        return jsonify({"error": "We couldn't send the code right now. Please try again in a few minutes."}), 502
+
+    dev_console = False
+    if not sent:
+        if not current_app.debug:
+            return jsonify({"error": "Text messages aren't set up on this server yet, so a reset code can't be sent."}), 503
+        # Local development without Twilio: the code goes to the server window only.
+        print(f"\n  [forgot password] code for {citizen.full_name}: {code}\n", flush=True)
+        dev_console = True
+
+    db.session.add(PasswordReset(citizen_id=citizen.id, code_hash=PasswordReset.hash_code(code),
+                                 created_at=now, expires_at=now + timedelta(minutes=RESET_CODE_MINUTES)))
+    db.session.commit()
+    return jsonify({"phone": _masked_phone(citizen.phone), "expires_in": RESET_CODE_MINUTES * 60,
+                    "resend_after": RESET_RESEND_SECONDS, "dev_console": dev_console})
+
+
+@api.post("/auth/reset")
+def reset_password():
+    data = _payload()
+    name = (data.get("name") or "").strip()
+    surname = (data.get("surname") or "").strip()
+    code = "".join(c for c in str(data.get("code") or "") if c.isdigit())
+    password = _password(data)
+    problem = _password_problem(password)
+    if problem:
+        return jsonify({"error": problem}), 400
+
+    citizen = _find_citizen(name, surname) if name and surname else None
+    # Only the newest code counts; asking for a new one cancels the old.
+    reset = (PasswordReset.query.filter_by(citizen_id=citizen.id).order_by(PasswordReset.created_at.desc()).first()
+             if citizen else None)
+    if not reset or reset.expires_at < datetime.utcnow():
+        return jsonify({"error": "This code has expired. Please ask for a new one."}), 400
+    if reset.attempts >= RESET_MAX_ATTEMPTS:
+        return jsonify({"error": "Too many wrong codes. Please ask for a new one."}), 429
+    if not reset.check_code(code):
+        reset.attempts += 1
+        db.session.commit()
+        left = RESET_MAX_ATTEMPTS - reset.attempts
+        return jsonify({"error": "That code is incorrect." + (f" {left} tries left." if left else " Please ask for a new one.")}), 400
+
+    citizen.set_password(password)
+    PasswordReset.query.filter_by(citizen_id=citizen.id).delete()
+    db.session.commit()
+    return _auth_response(citizen)
 
 
 AVATAR_SIZE = 320
@@ -213,7 +303,17 @@ def _detect(image_path: Path) -> list[dict] | None:
         current_app.logger.error("Waste check unavailable: %s", exc)
         return None
     conf = float(os.environ.get("YOLO_CONF_THRESHOLD", "0.25"))
-    return run_inference(model, str(image_path), conf=conf)
+
+    # Optional second model: names the type of each detected pile. Until it has been
+    # trained (model/weights/waste_type.pt) reports keep the detector's plain "waste".
+    type_model = None
+    type_weights = os.environ.get("WASTE_TYPE_WEIGHTS", "model/weights/waste_type.pt")
+    try:
+        type_model = load_model(type_weights)
+    except FileNotFoundError:
+        pass
+    type_conf = float(os.environ.get("WASTE_TYPE_CONF_THRESHOLD", "0.40"))
+    return run_inference(model, str(image_path), conf=conf, type_model=type_model, type_conf=type_conf)
 
 
 @api.post("/reports")
@@ -320,6 +420,7 @@ def create_reports():
                 report_id=report.id,
                 waste_type=detection["class_name"],
                 confidence=detection["confidence"],
+                type_confidence=detection.get("type_confidence"),
                 bbox_x1=detection["bbox"][0],
                 bbox_y1=detection["bbox"][1],
                 bbox_x2=detection["bbox"][2],
