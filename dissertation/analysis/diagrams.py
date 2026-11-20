@@ -32,7 +32,7 @@ def canvas(w, h):
 
 # ---- Figure 2.1 conceptual framework
 fig, ax = canvas(16, 8.2)
-box(ax, 0.3, 5.0, 3.2, 2.0, "Citizen as sensor\n(VGI: Goodchild, 2007)\nphoto + location + time")
+box(ax, 0.3, 5.0, 3.2, 2.0, "Citizen as sensor\n(volunteered geographic\ninformation)\nphoto + location + time")
 box(ax, 4.65, 5.0, 3.5, 2.0, "Automated verification\n(YOLO11 detector, threshold τ;\nwaste-type classifier)", "gold")
 box(ax, 9.3, 5.0, 3.0, 2.0, "Geolocated,\ntime-stamped,\ntyped report")
 box(ax, 13.05, 5.0, 2.6, 2.0, "Municipal\naction\n(clean-up)")
@@ -51,7 +51,7 @@ fig.savefig(OUT / "fig2_1_framework.png"); plt.close(fig)
 
 # ---- Figure 3.1 research process
 fig, ax = canvas(16, 6)
-labels = ["1. Problem\nidentification\n(Ch. 1–2)", "2. Objectives\nof a solution\n(RO1–RO4)",
+labels = ["1. Problem\nidentification\n(Ch. 1–2)", "2. Objectives\nof a solution\n(RO1–RO5)",
           "3. Design &\ndevelopment\n(data, models, system)", "4. Demonstration\n(prototype on\nphones + dashboard)",
           "5. Evaluation\n(test split, latency,\nlocation checks)", "6. Communication\n(dissertation)"]
 for i, t in enumerate(labels):
