@@ -12,6 +12,7 @@ backend/uploads/
 
 # model data + weights
 *.pt
+model/*.zip
 model/raw_images/
 model/dataset/
 model/datasets/
